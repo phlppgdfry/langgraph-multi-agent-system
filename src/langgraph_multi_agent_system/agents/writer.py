@@ -1,6 +1,6 @@
 """Executive Writer Agent: Synthesizes findings into a professional markdown report."""
 
-import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage
@@ -38,7 +38,7 @@ def writer_node(state: AgentState) -> dict[str, Any]:
     res = llm.invoke([HumanMessage(content=prompt)])
     exec_overview = res.content
 
-    today_str = datetime.date.today().isoformat()
+    today_str = datetime.now(UTC).date().isoformat()
 
     report = f"""# 📊 Strategic Intelligence Briefing: {task.title()}
 **Generated:** {today_str} | **Engine:** LangGraph Multi-Agent Swarm | **Quality Score:** {critique.get('score', 92)}/100 (Revisions: {revisions})
