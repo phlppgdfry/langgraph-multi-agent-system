@@ -1,8 +1,8 @@
-"""Graph assembly for the LangGraph multi-agent system."""
+"""Graph assembly and state compilation for the LangGraph multi-agent system."""
 
-from typing import Literal
+from typing import Any, Literal
 
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_multi_agent_system.agents.analyst import analyst_node
@@ -11,10 +11,13 @@ from langgraph_multi_agent_system.agents.human_gate import human_gate_node
 from langgraph_multi_agent_system.agents.researcher import researcher_node
 from langgraph_multi_agent_system.agents.supervisor import supervisor_node
 from langgraph_multi_agent_system.agents.writer import writer_node
+from langgraph_multi_agent_system.checkpoint import get_checkpointer
 from langgraph_multi_agent_system.state import AgentState
 
 
-def supervisor_router(state: AgentState) -> Literal["researcher", "analyst", "critic", "human_gate", "writer", "__end__"]:
+def supervisor_router(
+    state: AgentState,
+) -> Literal["researcher", "analyst", "critic", "human_gate", "writer", "__end__"]:
     """Routes execution based on the supervisor's decision."""
     target = state.get("next_agent", "writer")
     if target == "researcher":
@@ -30,8 +33,21 @@ def supervisor_router(state: AgentState) -> Literal["researcher", "analyst", "cr
     return "__end__"
 
 
-def create_graph(checkpointer=None):
-    """Builds and compiles the multi-agent StateGraph."""
+def create_graph(
+    checkpointer: BaseCheckpointSaver | None = None,
+    interrupt_on_human_gate: bool = False,
+    **compile_kwargs: Any,
+):
+    """Builds and compiles the multi-agent StateGraph.
+
+    Args:
+        checkpointer: Custom checkpointer (SqliteSaver, MemorySaver) or None to use default.
+        interrupt_on_human_gate: If True, halts execution right before human_gate for HITL approval.
+        compile_kwargs: Additional arguments passed to StateGraph.compile().
+
+    Returns:
+        Compiled StateGraph application.
+    """
     workflow = StateGraph(AgentState)
 
     # Register agent nodes
@@ -55,7 +71,7 @@ def create_graph(checkpointer=None):
             "human_gate": "human_gate",
             "writer": "writer",
             "__end__": END,
-        }
+        },
     )
 
     # Return cycles back to supervisor
@@ -66,9 +82,15 @@ def create_graph(checkpointer=None):
     workflow.add_edge("writer", END)
 
     if checkpointer is None:
-        checkpointer = MemorySaver()
+        checkpointer = get_checkpointer()
 
-    return workflow.compile(checkpointer=checkpointer)
+    interrupt_before = ["human_gate"] if interrupt_on_human_gate else None
+
+    return workflow.compile(
+        checkpointer=checkpointer,
+        interrupt_before=interrupt_before,
+        **compile_kwargs,
+    )
 
 
 # Top-level export for LangGraph Studio (`langgraph dev`)

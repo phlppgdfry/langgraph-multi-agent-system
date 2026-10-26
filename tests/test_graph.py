@@ -1,5 +1,7 @@
-"""Unit and integration tests for LangGraph swarm workflow."""
+"""Unit and integration tests for LangGraph swarm workflow and persistence."""
 
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph_multi_agent_system.checkpoint import get_checkpointer
 from langgraph_multi_agent_system.graph import create_graph
 
 
@@ -14,7 +16,7 @@ def test_graph_compilation():
 
 
 def test_graph_end_to_end_execution():
-    app = create_graph()
+    app = create_graph(checkpointer=MemorySaver())
     initial_state = {
         "task": "Benchmark LangGraph agent efficiency",
         "messages": [],
@@ -29,23 +31,22 @@ def test_graph_end_to_end_execution():
         "requires_human_approval": False,
         "human_approved": None,
         "final_report": None,
-        "metadata": {}
+        "metadata": {},
     }
     config = {"configurable": {"thread_id": "test-thread-1"}}
 
-    final_state = None
-    for output in app.stream(initial_state, config=config):
-        for state_update in output.values():
-            final_state = state_update
+    for _ in app.stream(initial_state, config=config):
+        pass
 
-    assert final_state is not None
-    assert final_state.get("final_report") is not None
-    assert len(final_state.get("final_report")) > 100
-    assert "Executive Summary" in final_state.get("final_report")
+    full_state = app.get_state(config).values
+    assert full_state is not None
+    assert full_state.get("final_report") is not None
+    assert len(full_state.get("final_report")) > 100
+    assert "Executive Summary" in full_state.get("final_report")
 
 
 def test_human_gate_checkpoint():
-    app = create_graph()
+    app = create_graph(checkpointer=MemorySaver(), interrupt_on_human_gate=False)
     initial_state = {
         "task": "Test Human Gate Approval",
         "messages": [],
@@ -60,12 +61,17 @@ def test_human_gate_checkpoint():
         "requires_human_approval": True,
         "human_approved": None,
         "final_report": None,
-        "metadata": {}
+        "metadata": {},
     }
     config = {"configurable": {"thread_id": "test-human-thread"}}
 
-    outputs = list(app.stream(initial_state, config=config))
-    assert len(outputs) > 0
-    last_update = outputs[-1]
-    assert "writer" in last_update
-    assert last_update["writer"]["final_report"] is not None
+    for _ in app.stream(initial_state, config=config):
+        pass
+
+    full_state = app.get_state(config).values
+    assert full_state.get("final_report") is not None
+
+
+def test_sqlite_checkpointer_instance():
+    checkpointer = get_checkpointer(backend="sqlite", db_path="data/test_swarm.db")
+    assert checkpointer is not None

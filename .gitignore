@@ -42,6 +42,8 @@ htmlcov/
 # LangSmith & LangGraph local state
 .langgraph_api/
 .langgraph/
+data/*.db
+briefing*.md
 
 # IDE & OS
 .DS_Store
