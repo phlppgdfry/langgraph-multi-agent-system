@@ -1,5 +1,6 @@
 # ⚡ Nexus: Autonomous Multi-Agent Intelligence Swarm
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-0284C7.svg?logo=googlechrome&logoColor=white)](https://phlppgdfry.github.io/langgraph-multi-agent-system/)
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![LangChain Core](https://img.shields.io/badge/LangChain%20Core-v1.7%2B-1C3C3C.svg?logo=langchain&logoColor=white)](https://www.langchain.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-v1.2%2B-8A2BE2.svg)](https://langchain-ai.github.io/langgraph/)
@@ -9,6 +10,8 @@
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B.svg)](LICENSE)
 
+> 🌐 **Interactive Web Showcase & Simulator:** [phlppgdfry.github.io/langgraph-multi-agent-system](https://phlppgdfry.github.io/langgraph-multi-agent-system/)
+> 
 > **A production-grade, stateful multi-agent intelligence swarm built with LangGraph, LangChain Core, LangSmith observability, reflection-driven self-correction, SQLite state persistence, and Human-in-the-Loop governance.**
 
 ---

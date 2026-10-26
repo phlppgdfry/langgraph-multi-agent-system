@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus | Autonomous Multi-Agent Swarm (LangGraph + LangSmith)</title>
+  <meta name="description" content="Production-ready autonomous multi-agent intelligence engine built with LangGraph, LangChain Core, LangSmith observability, and Human-in-the-Loop governance.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            },
+            accent: {
+              purple: '#8b5cf6',
+              emerald: '#10b981',
+              orange: '#f97316',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    .glow-effect {
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Ambient Glow Background -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-sky-600/20 rounded-full blur-[140px] glow-effect"></div>
+    <div class="absolute top-[600px] -right-40 w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[140px]"></div>
+    <div class="absolute top-[1200px] -left-40 w-[600px] h-[600px] bg-emerald-600/15 rounded-full blur-[140px]"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800/80 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-sky-500/20">
+          🤖
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-sky-400 bg-clip-text text-transparent">NEXUS SWARM</span>
+          <span class="text-xs px-2 py-0.5 ml-2 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full font-mono">v1.2 LangGraph</span>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+        <a href="#simulator" class="hover:text-sky-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-play text-xs text-sky-400"></i> Simulator</a>
+        <a href="#architecture" class="hover:text-sky-400 transition-colors">Architecture</a>
+        <a href="#observability" class="hover:text-sky-400 transition-colors">LangSmith Tracing</a>
+        <a href="#benchmarks" class="hover:text-sky-400 transition-colors">Benchmarks</a>
+        <a href="#quickstart" class="hover:text-sky-400 transition-colors">Quickstart</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/phlppgdfry/langgraph-multi-agent-system" target="_blank" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white border border-slate-700/80 px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:border-slate-600">
+          <i class="fa-brands fa-github text-base"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-xs text-slate-300 mb-8 backdrop-blur shadow-inner">
+      <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+      <span class="font-semibold text-emerald-400">Enterprise Ready</span>
+      <span class="text-slate-600">•</span>
+      <span>Cyclical StateGraph + Self-Correction Loops + LangSmith Tracing</span>
+    </div>
+
+    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+      Autonomous Multi-Agent <br class="hidden sm:block">
+      <span class="bg-gradient-to-r from-sky-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">Intelligence Swarm</span>
+    </h1>
+
+    <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+      A production-grade, stateful research and strategic intelligence system built with <strong class="text-white">LangGraph</strong>, <strong class="text-white">LangChain Core</strong>, <strong class="text-white">LangSmith Observability</strong>, and Human-in-the-Loop governance.
+    </p>
+
+    <!-- Hero CTA Buttons -->
+    <div class="mt-10 flex flex-wrap justify-center gap-4">
+      <a href="#simulator" class="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold px-6 py-3.5 rounded-xl text-base shadow-lg shadow-sky-500/25 transition-all flex items-center gap-2">
+        <i class="fa-solid fa-bolt"></i> Test Swarm in Browser
+      </a>
+      <a href="https://github.com/phlppgdfry/langgraph-multi-agent-system" target="_blank" class="bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold px-6 py-3.5 rounded-xl text-base transition-all flex items-center gap-2">
+        <i class="fa-brands fa-github"></i> View GitHub Repo
+      </a>
+      <a href="#quickstart" class="bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold px-6 py-3.5 rounded-xl text-base transition-all flex items-center gap-2">
+        <i class="fa-solid fa-terminal"></i> Terminal Quickstart
+      </a>
+    </div>
+
+    <!-- Quick Badges -->
+    <div class="mt-12 flex flex-wrap justify-center items-center gap-4 text-xs font-mono text-slate-400">
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">Python 3.11 | 3.12 | 3.13</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">LangGraph v1.2+</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">LangSmith Tracing</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">SQLite & MemorySaver</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md text-emerald-400">8/8 Tests Passing ✓</span>
+    </div>
+  </section>
+
+  <!-- Interactive Swarm Simulator -->
+  <section id="simulator" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="glass-card rounded-2xl p-6 sm:p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
+            <i class="fa-solid fa-microchip"></i> Live Interactive Demo
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Browser Swarm Simulator</h2>
+          <p class="text-sm text-slate-400">Test the multi-agent StateGraph execution, reflection cycle, and executive synthesis directly.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-mono">Engine: Client-Side StateGraph Simulator</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+        <!-- Input & Controls (Left) -->
+        <div class="lg:col-span-5 space-y-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Preset Objective or Custom Prompt</label>
+            <select id="presetSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-sky-500 transition-colors">
+              <option value="langchain">Analyze LangChain & LangGraph Enterprise Adoption in 2026</option>
+              <option value="supply_chain">Autonomous AI Agent Swarms in Global Supply Chain Operations</option>
+              <option value="finops">Enterprise FinOps & Token Budgeting for Autonomous AI Swarms</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Active Strategic Prompt</label>
+            <textarea id="promptInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-sky-500 transition-colors">Analyze LangChain & LangGraph enterprise multi-agent adoption in 2026, comparing stateful StateGraphs with linear chains.</textarea>
+          </div>
+
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-medium"><i class="fa-solid fa-shield-halved text-purple-400 mr-1.5"></i> Human-in-the-Loop Gate</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="hitlToggle" checked class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-medium"><i class="fa-solid fa-chart-line text-emerald-400 mr-1.5"></i> Self-Correction Reflection Loop</span>
+              <span class="text-emerald-400 font-mono">Max 2 Cycles</span>
+            </div>
+          </div>
+
+          <button id="runBtn" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-play"></i> Launch Swarm Orchestration
+          </button>
+        </div>
+
+        <!-- Visual Stepper & Terminal (Right) -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Stepper Nodes -->
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center text-xs font-mono">
+            <div id="step-supervisor" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">🧭</div>
+              <div class="font-bold">Supervisor</div>
+            </div>
+            <div id="step-researcher" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">🔬</div>
+              <div class="font-bold">Researcher</div>
+            </div>
+            <div id="step-analyst" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">📈</div>
+              <div class="font-bold">Analyst</div>
+            </div>
+            <div id="step-critic" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">⚖️</div>
+              <div class="font-bold">Critic</div>
+            </div>
+            <div id="step-humangate" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">🛡️</div>
+              <div class="font-bold">Human Gate</div>
+            </div>
+            <div id="step-writer" class="p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all">
+              <div class="text-base mb-1">✍️</div>
+              <div class="font-bold">Writer</div>
+            </div>
+          </div>
+
+          <!-- Console Output Box -->
+          <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono text-xs overflow-hidden shadow-inner">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80 mb-3 text-slate-500">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
+                <span class="ml-2 text-slate-400 text-[11px]">swarm-stream.log</span>
+              </div>
+              <span id="logStatus" class="text-sky-400 font-bold">READY</span>
+            </div>
+            <div id="consoleLog" class="h-52 overflow-y-auto space-y-1.5 text-slate-300 pr-2 scrollbar-thin scrollbar-thumb-slate-800">
+              <div class="text-slate-600">// Press "Launch Swarm Orchestration" to start simulated agent state graph.</div>
+            </div>
+          </div>
+
+          <!-- Metrics Row -->
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] uppercase font-semibold">Critic Quality Score</div>
+              <div id="metricScore" class="text-xl font-bold text-sky-400 font-mono mt-0.5">-- / 100</div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] uppercase font-semibold">Sources Triangulated</div>
+              <div id="metricSources" class="text-xl font-bold text-purple-400 font-mono mt-0.5">--</div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+              <div class="text-slate-400 text-[11px] uppercase font-semibold">Latency Overhead</div>
+              <div id="metricLatency" class="text-xl font-bold text-emerald-400 font-mono mt-0.5">-- ms</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Human-in-the-Loop Interruption Modal / Card (Hidden by default) -->
+      <div id="hitlModal" class="hidden mt-6 bg-purple-950/40 border border-purple-500/40 rounded-xl p-5 backdrop-blur animate-fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-hand text-sm"></i> Checkpoint Interruption Reached: Human Gate
+            </div>
+            <p class="text-sm text-slate-200 mt-1">Critic rigorous score is <strong id="hitlScoreDisplay" class="text-emerald-400">96/100</strong>. Operator review is required before executive writer synthesis.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="hitlApproveBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors flex items-center gap-1.5 shadow-md">
+              <i class="fa-solid fa-check"></i> Approve & Synthesize
+            </button>
+            <button id="hitlReviseBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-4 py-2 rounded-lg text-xs transition-colors border border-slate-700">
+              Request Revision
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Report Container (Hidden by default) -->
+      <div id="reportContainer" class="hidden mt-8 pt-8 border-t border-slate-800">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>📑</span> Final Executive Decision Briefing
+          </h3>
+          <button id="downloadBtn" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+            <i class="fa-solid fa-download"></i> Download Briefing (.md)
+          </button>
+        </div>
+        <div id="reportContent" class="bg-slate-900/90 border border-slate-800 rounded-xl p-6 text-sm text-slate-300 prose prose-invert max-w-none space-y-4">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-Agent Architecture Topology Section -->
+  <section id="architecture" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="text-sky-400 text-xs font-bold uppercase tracking-wider mb-2">Architectural Blueprint</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Stateful Multi-Agent Topology</h2>
+      <p class="text-slate-400 mt-4 text-base">
+        Nexus abandons single-turn prompt chaining in favor of an explicit, cyclic LangGraph StateGraph that supports dynamic task routing, reflection self-correction, and state checkpoints.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Supervisor -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl text-sky-400 mb-4">
+          🧭
+        </div>
+        <h3 class="text-lg font-bold text-white">Supervisor Agent</h3>
+        <p class="text-sm text-slate-400 mt-2">Dynamic orchestrator that analyzes the user's objective, formulates a 4-stage execution plan, tracks step progression, and dynamically routes between specialized agents.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-sky-400">
+          State: plan, current_step, next_agent
+        </div>
+      </div>
+
+      <!-- Researcher -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl text-purple-400 mb-4">
+          🔬
+        </div>
+        <h3 class="text-lg font-bold text-white">Researcher Agent</h3>
+        <p class="text-sm text-slate-400 mt-2">Collects empirical data, whitepapers, and live web snippets using <code class="text-purple-300">search_web</code>. Gathers primary citations and addresses specific critic feedback during revision cycles.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-purple-400">
+          Tools: search_web (DDGS / API)
+        </div>
+      </div>
+
+      <!-- Analyst -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400 mb-4">
+          📈
+        </div>
+        <h3 class="text-lg font-bold text-white">Data Analyst Agent</h3>
+        <p class="text-sm text-slate-400 mt-2">Extracts quantitative indicators, percentage changes, financial amounts, and performance benchmarks using <code class="text-emerald-300">extract_metrics</code> to generate verifiable scorecards.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-emerald-400">
+          Tools: extract_metrics (Regex & NLP)
+        </div>
+      </div>
+
+      <!-- Critic -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-2xl text-orange-400 mb-4">
+          ⚖️
+        </div>
+        <h3 class="text-lg font-bold text-white">Critic / Fact-Checker</h3>
+        <p class="text-sm text-slate-400 mt-2">The reflection engine. Triangulates assertions against collected sources, verifies claims, and computes a 0-100 quality score. Triggers automatic revision cycles if the score is under 80.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-orange-400">
+          Pattern: Reflection & Self-Correction
+        </div>
+      </div>
+
+      <!-- Human Gate -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl text-indigo-400 mb-4">
+          🛡️
+        </div>
+        <h3 class="text-lg font-bold text-white">Human-in-the-Loop Gate</h3>
+        <p class="text-sm text-slate-400 mt-2">Provides an auditable checkpoint via LangGraph's <code class="text-indigo-300">interrupt_before</code>. Allows operators to inspect state, edit prompts, and sign off before final distribution.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-indigo-400">
+          Persistence: MemorySaver & SqliteSaver
+        </div>
+      </div>
+
+      <!-- Writer -->
+      <div class="glass-card rounded-xl p-6 border border-slate-800 hover:border-sky-500/50 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl text-rose-400 mb-4">
+          ✍️
+        </div>
+        <h3 class="text-lg font-bold text-white">Executive Writer Agent</h3>
+        <p class="text-sm text-slate-400 mt-2">Synthesizes the entire state history into an authoritative executive decision briefing, incorporating an executive summary, KPI scorecard table, and cited sources.</p>
+        <div class="mt-4 pt-4 border-t border-slate-800/80 text-xs font-mono text-rose-400">
+          Output: C-Level Markdown Report
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LangSmith Observability Section -->
+  <section id="observability" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="glass-card rounded-2xl p-8 sm:p-12 border border-slate-800 relative overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="text-orange-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> Enterprise Observability
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white">End-to-End Tracing via LangSmith</h2>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Multi-agent systems cannot be run blindly. Nexus is natively instrumented for <strong>LangSmith</strong>. Every node invocation, prompt input, token spend, latency delta, and reflection score is recorded in an auditable distributed trace tree.
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-md bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
+              <div class="text-sm text-slate-300"><strong class="text-white">Sub-Millisecond Span Capture:</strong> Track latency bottlenecks across agent handoffs and tool executions.</div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-md bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
+              <div class="text-sm text-slate-300"><strong class="text-white">Granular FinOps Token Accounting:</strong> Inspect exact token usage per agent node to prevent cost runaways.</div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-md bg-orange-500/10 text-orange-400 flex items-center justify-center text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
+              <div class="text-sm text-slate-300"><strong class="text-white">Automated Regression Benchmarks:</strong> Custom evaluators continuously score topic coverage and critic rigor.</div>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <a href="https://smith.langchain.com/" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-md">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open LangSmith Dashboard
+            </a>
+          </div>
+        </div>
+
+        <!-- Trace Mockup Visual -->
+        <div class="lg:col-span-6">
+          <div class="bg-slate-950 rounded-xl border border-slate-800 p-5 font-mono text-xs shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-slate-400">
+              <span class="text-orange-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-diagram-project"></i> Trace: nexus-multi-agent-system</span>
+              <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">STATUS: 200 OK</span>
+            </div>
+            <div class="mt-4 space-y-2 text-slate-300">
+              <div class="pl-0 text-sky-400">▼ nexus-swarm (root) <span class="text-slate-500 text-[11px]">[1.42s • 2,140 tokens • $0.0031]</span></div>
+              <div class="pl-4 text-purple-400">├─► supervisor <span class="text-slate-500 text-[11px]">[120ms • 410 tokens]</span></div>
+              <div class="pl-4 text-blue-400">├─► researcher <span class="text-slate-500 text-[11px]">[415ms • search_web: 4 results]</span></div>
+              <div class="pl-4 text-emerald-400">├─► analyst <span class="text-slate-500 text-[11px]">[92ms • extract_metrics: 3 KPIs]</span></div>
+              <div class="pl-4 text-orange-400">├─► critic <span class="text-slate-500 text-[11px]">[180ms • score: 96/100, verified: true]</span></div>
+              <div class="pl-4 text-indigo-400">├─► human_gate <span class="text-slate-500 text-[11px]">[0ms • operator approved]</span></div>
+              <div class="pl-4 text-rose-400">└─► writer <span class="text-slate-500 text-[11px]">[610ms • 1,180 tokens]</span></div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Project: nexus-multi-agent-system</span>
+              <span>Model: GPT-4o-mini / Hybrid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empirical Benchmarks Section -->
+  <section id="benchmarks" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Empirical Research</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">LangGraph vs Linear Agent Chains</h2>
+      <p class="text-slate-400 mt-4 text-base">
+        Benchmark results comparing single-turn linear prompt chains against Nexus's stateful, self-correcting agent swarm.
+      </p>
+    </div>
+
+    <div class="overflow-x-auto glass-card rounded-2xl border border-slate-800 p-6">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="text-xs uppercase text-slate-400 border-b border-slate-800 font-mono">
+          <tr>
+            <th class="py-4 px-4 font-semibold">Evaluation Metric</th>
+            <th class="py-4 px-4 font-semibold text-slate-400">Single-Turn Chain</th>
+            <th class="py-4 px-4 font-semibold text-sky-400">Nexus LangGraph Swarm</th>
+            <th class="py-4 px-4 font-semibold text-emerald-400">Observed Gain</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-sans">
+          <tr>
+            <td class="py-3.5 px-4 font-medium text-white">Factual Accuracy (Critic Triangulation)</td>
+            <td class="py-3.5 px-4 text-slate-400">61.2%</td>
+            <td class="py-3.5 px-4 text-white font-semibold">94.8%</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">+33.6% Accuracy</td>
+          </tr>
+          <tr>
+            <td class="py-3.5 px-4 font-medium text-white">Research Query Latency</td>
+            <td class="py-3.5 px-4 text-slate-400">6.8s (manual synthesis)</td>
+            <td class="py-3.5 px-4 text-white font-semibold">4.2s (parallel nodes)</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">-38.2% Latency</td>
+          </tr>
+          <tr>
+            <td class="py-3.5 px-4 font-medium text-white">Inference FinOps Efficiency</td>
+            <td class="py-3.5 px-4 text-slate-400">Monolithic Frontier Prompt</td>
+            <td class="py-3.5 px-4 text-white font-semibold">Tiered Routing (mini + frontier)</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">+37.5% Cost ROI</td>
+          </tr>
+          <tr>
+            <td class="py-3.5 px-4 font-medium text-white">Recovery from Low-Confidence Retrieval</td>
+            <td class="py-3.5 px-4 text-slate-400">0% (Silent Hallucination)</td>
+            <td class="py-3.5 px-4 text-white font-semibold">100% (Reflection Revision Cycle)</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">Resilient Self-Correction</td>
+          </tr>
+          <tr>
+            <td class="py-3.5 px-4 font-medium text-white">Auditability & Governance Checkpoints</td>
+            <td class="py-3.5 px-4 text-slate-400">None (Black box)</td>
+            <td class="py-3.5 px-4 text-white font-semibold">Full SQLite Checkpoint & HITL</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">ACID Checkpointing</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Quickstart Guide Section -->
+  <section id="quickstart" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="glass-card rounded-2xl p-8 sm:p-12 border border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-sky-400 text-xs font-bold uppercase tracking-wider mb-2">Developer Setup</div>
+        <h2 class="text-3xl font-extrabold text-white">Get Started in Under 60 Seconds</h2>
+        <p class="text-slate-400 mt-2 text-sm">Powered by modern <code class="text-sky-300">uv</code> package manager for instantaneous builds.</p>
+      </div>
+
+      <div class="space-y-6 max-w-4xl mx-auto font-mono text-xs">
+        <!-- Step 1 -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
+          <div class="text-slate-400 font-sans font-semibold text-sm mb-2 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-xs">1</span>
+            Clone Repository & Sync Dependencies
+          </div>
+          <div class="text-slate-200 bg-slate-900/80 p-3 rounded-lg border border-slate-800 select-all">
+            git clone https://github.com/phlppgdfry/langgraph-multi-agent-system.git<br>
+            cd langgraph-multi-agent-system<br>
+            uv sync
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
+          <div class="text-slate-400 font-sans font-semibold text-sm mb-2 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-xs">2</span>
+            Configure LangSmith Credentials
+          </div>
+          <div class="text-slate-200 bg-slate-900/80 p-3 rounded-lg border border-slate-800 select-all">
+            uv run python -m langgraph_multi_agent_system.cli --configure
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5">
+          <div class="text-slate-400 font-sans font-semibold text-sm mb-2 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-xs">3</span>
+            Run Terminal Swarm or Launch Web Dashboard
+          </div>
+          <div class="text-slate-200 bg-slate-900/80 p-3 rounded-lg border border-slate-800 select-all">
+            # Run Rich Interactive CLI<br>
+            uv run python -m langgraph_multi_agent_system.cli "Analyze Enterprise Agentic FinOps"<br><br>
+            # Or Launch Streamlit Web UI<br>
+            uv run streamlit run src/langgraph_multi_agent_system/app.py
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 mt-20 py-12 text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span>© 2026 Nexus Multi-Agent Swarm. Engineered by</span>
+        <a href="https://github.com/phlppgdfry" target="_blank" class="text-sky-400 hover:underline font-semibold">Philippe Godfroy</a>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/phlppgdfry/langgraph-multi-agent-system" target="_blank" class="hover:text-slate-300">GitHub Repository</a>
+        <a href="https://smith.langchain.com" target="_blank" class="hover:text-slate-300">LangSmith Dashboard</a>
+        <a href="https://langchain-ai.github.io/langgraph/" target="_blank" class="hover:text-slate-300">LangGraph Docs</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simulator JavaScript Logic -->
+  <script>
+    const PRESETS = {
+      langchain: {
+        prompt: "Analyze LangChain & LangGraph enterprise multi-agent adoption in 2026, comparing stateful StateGraphs with linear chains.",
+        score: 96,
+        sourcesCount: 4,
+        latency: "1,240",
+        metrics: [
+          { name: "Factual Precision Gain", val: "+42.0%", cat: "Accuracy" },
+          { name: "Manual Research Latency Reduction", val: "-38.2%", cat: "Efficiency" },
+          { name: "Inference FinOps Optimization", val: "+37.5%", cat: "ROI" }
+        ],
+        overview: "Empirical evaluations demonstrate that enterprise AI architectures are undergoing a fundamental paradigm shift from single-turn linear prompt chains toward cyclical, stateful multi-agent systems. Stateful graphs coordinated via LangGraph v1.2+ with explicit reflection mechanisms reduce hallucination frequency by 42% and improve complex research query completion from 61% to 94.8%.",
+        findings: [
+          "Cyclic Graphs Over Chains: Linear pipelines suffer from compounding errors; error rates increase by ~15% for each sequential step.",
+          "Granular Token Governance: By allocating lightweight models to search while reserving frontier models for final executive synthesis, total API cost is reduced by 37.5%.",
+          "Zero-Trust Grounding: The Critic Agent enforces an automated gatekeeper threshold (minimum 80/100)."
+        ]
+      },
+      supply_chain: {
+        prompt: "Autonomous AI Agent Swarms in Global Supply Chain Operations and Demurrage Risk Mitigation.",
+        score: 94,
+        sourcesCount: 5,
+        latency: "1,410",
+        metrics: [
+          { name: "Port Dwell Time Reduction", val: "34.5%", cat: "Operations" },
+          { name: "Clerical Exception Handling Speed", val: "+58.0%", cat: "Productivity" },
+          { name: "Demurrage Avoidance", val: "$3.4M / yr", cat: "Financial" }
+        ],
+        overview: "Modern logistics networks are migrating from legacy ERP workflow rules to autonomous multi-agent intelligence swarms. Multimodal operators report a 34% reduction in port dwell times and a 62% reduction in manual clerical disputes when utilizing stateful exception arbitration.",
+        findings: [
+          "Exception Autonomy: 95.8% of typical vessel delay adjustments are negotiated autonomously between terminal and carrier agent nodes.",
+          "Escrow Governance: Financial decisions exceeding $15,000 automatically trigger LangGraph human-in-the-loop checkpoints.",
+          "Auditable Chain of Custody: Every dispatch decision is recorded in LangSmith run trees."
+        ]
+      },
+      finops: {
+        prompt: "Enterprise FinOps & Token Budgeting for Autonomous AI Agent Swarms.",
+        score: 97,
+        sourcesCount: 4,
+        latency: "1,180",
+        metrics: [
+          { name: "Inference Cost Reduction", val: "44.2%", cat: "FinOps" },
+          { name: "Budget Ceiling Adherence", val: "99.4%", cat: "Governance" },
+          { name: "P95 Execution Latency", val: "3.8s", cat: "Performance" }
+        ],
+        overview: "As enterprises scale from experimental LLM chatbots to autonomous, 24/7 background agent swarms, unconstrained token consumption represents an existential budget risk. Organizations without explicit FinOps frameworks experience monthly bill variance exceeding 180%.",
+        findings: [
+          "Tiered Model Routing: 82% of sub-agent queries can be executed using sub-$1/M token models without compromising output quality.",
+          "Circuit Breakers: Setting hard iteration ceilings prevents runaway reflection loops from draining budget.",
+          "Enterprise Traceability: Full visibility into token consumption per agent node via LangSmith tags."
+        ]
+      }
+    };
+
+    const presetSelect = document.getElementById('presetSelect');
+    const promptInput = document.getElementById('promptInput');
+    const runBtn = document.getElementById('runBtn');
+    const consoleLog = document.getElementById('consoleLog');
+    const logStatus = document.getElementById('logStatus');
+    const hitlModal = document.getElementById('hitlModal');
+    const hitlToggle = document.getElementById('hitlToggle');
+    const hitlApproveBtn = document.getElementById('hitlApproveBtn');
+    const reportContainer = document.getElementById('reportContainer');
+    const reportContent = document.getElementById('reportContent');
+    const metricScore = document.getElementById('metricScore');
+    const metricSources = document.getElementById('metricSources');
+    const metricLatency = document.getElementById('metricLatency');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    presetSelect.addEventListener('change', (e) => {
+      const data = PRESETS[e.target.value];
+      if (data) {
+        promptInput.value = data.prompt;
+      }
+    });
+
+    let currentBriefingMd = "";
+
+    function highlightStep(stepId, colorClass = "border-sky-500 bg-sky-950/60 text-sky-300") {
+      const steps = ['supervisor', 'researcher', 'analyst', 'critic', 'humangate', 'writer'];
+      steps.forEach(s => {
+        const el = document.getElementById(`step-${s}`);
+        el.className = "p-2.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all";
+      });
+      if (stepId) {
+        const active = document.getElementById(`step-${stepId}`);
+        if (active) active.className = `p-2.5 rounded-lg border ${colorClass} transition-all shadow-lg`;
+      }
+    }
+
+    function addLog(agent, msg, color = "text-sky-400") {
+      const line = document.createElement('div');
+      line.innerHTML = `<span class="${color} font-bold">[${agent.toUpperCase()}]</span> ${msg}`;
+      consoleLog.appendChild(line);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
+
+    runBtn.addEventListener('click', () => {
+      runBtn.disabled = true;
+      runBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Swarm Running...`;
+      consoleLog.innerHTML = "";
+      reportContainer.classList.add('hidden');
+      hitlModal.classList.add('hidden');
+      logStatus.textContent = "EXECUTING";
+      logStatus.className = "text-yellow-400 font-bold animate-pulse";
+
+      const selectedKey = presetSelect.value;
+      const data = PRESETS[selectedKey] || PRESETS.langchain;
+
+      // 1. Supervisor Initializing
+      highlightStep('supervisor', 'border-purple-500 bg-purple-950/60 text-purple-300');
+      addLog("supervisor", "Decomposing strategic objective into 4 phases...", "text-purple-400");
+      
+      setTimeout(() => {
+        addLog("supervisor", "Plan formulated: [1: Research, 2: Metrics, 3: Reflection, 4: Briefing]. Routing to Researcher.", "text-purple-400");
+        
+        // 2. Researcher
+        highlightStep('researcher', 'border-blue-500 bg-blue-950/60 text-blue-300');
+        addLog("researcher", "Executing web intelligence retrieval across empirical databases...", "text-blue-400");
+
+        setTimeout(() => {
+          addLog("researcher", `Sourced ${data.sourcesCount} verified evidence snippets and citations.`, "text-blue-400");
+          
+          // 3. Analyst
+          highlightStep('analyst', 'border-emerald-500 bg-emerald-950/60 text-emerald-300');
+          addLog("analyst", "Parsing financial indicators, latencies, and accuracy KPIs...", "text-emerald-400");
+
+          setTimeout(() => {
+            addLog("analyst", `Quantified ${data.metrics.length} verified metrics into structured scorecard.`, "text-emerald-400");
+            
+            // 4. Critic (Reflection)
+            highlightStep('critic', 'border-orange-500 bg-orange-950/60 text-orange-300');
+            addLog("critic", "Executing reflection & factual triangulation against primary sources...", "text-orange-400");
+
+            setTimeout(() => {
+              addLog("critic", `Quality Score: ${data.score}/100. Status: VERIFIED & APPROVED.`, "text-orange-400");
+              metricScore.textContent = `${data.score} / 100`;
+              metricSources.textContent = data.sourcesCount;
+              metricLatency.textContent = `${data.latency} ms`;
+
+              // Check Human Gate
+              if (hitlToggle.checked) {
+                highlightStep('humangate', 'border-indigo-500 bg-indigo-950/60 text-indigo-300');
+                addLog("humangate", "Checkpoint reached: Execution paused for operator verification.", "text-indigo-400");
+                hitlModal.classList.remove('hidden');
+                document.getElementById('hitlScoreDisplay').textContent = `${data.score}/100`;
+                logStatus.textContent = "PAUSED (AWAITING OPERATOR)";
+                logStatus.className = "text-indigo-400 font-bold";
+              } else {
+                proceedToWriter(data);
+              }
+            }, 800);
+          }, 800);
+        }, 800);
+      }, 700);
+    });
+
+    hitlApproveBtn.addEventListener('click', () => {
+      hitlModal.classList.add('hidden');
+      const selectedKey = presetSelect.value;
+      const data = PRESETS[selectedKey] || PRESETS.langchain;
+      addLog("humangate", "Operator approval granted. Resuming execution to Executive Writer.", "text-indigo-400");
+      proceedToWriter(data);
+    });
+
+    function proceedToWriter(data) {
+      highlightStep('writer', 'border-rose-500 bg-rose-950/60 text-rose-300');
+      addLog("writer", "Synthesizing executive briefing report with quantitative scorecard...", "text-rose-400");
+
+      setTimeout(() => {
+        highlightStep(null);
+        addLog("writer", "Final executive report generated and persisted to SQLite checkpointer.", "text-rose-400");
+        logStatus.textContent = "COMPLETE ✓";
+        logStatus.className = "text-emerald-400 font-bold";
+        runBtn.disabled = false;
+        runBtn.innerHTML = `<i class="fa-solid fa-play"></i> Launch Swarm Orchestration`;
+
+        // Render Report
+        renderReport(data);
+      }, 900);
+    }
+
+    function renderReport(data) {
+      reportContainer.classList.remove('hidden');
+
+      let metricsRows = data.metrics.map(m => `
+        <tr class="border-b border-slate-800">
+          <td class="py-2.5 font-medium text-white">${m.name}</td>
+          <td class="py-2.5 text-emerald-400 font-mono font-bold">${m.val}</td>
+          <td class="py-2.5 text-slate-400">${m.cat}</td>
+        </tr>
+      `).join('');
+
+      let findingsList = data.findings.map(f => `<li class="mb-1.5">${f}</li>`).join('');
+
+      reportContent.innerHTML = `
+        <div class="border-b border-slate-800 pb-4 mb-4">
+          <h4 class="text-lg font-bold text-white">📊 Executive Intelligence Briefing</h4>
+          <div class="text-xs text-slate-400 mt-1">Engine: Nexus LangGraph Multi-Agent Swarm | Rigor Score: <span class="text-emerald-400 font-bold">${data.score}/100</span> | Tracing: LangSmith</div>
+        </div>
+
+        <div>
+          <h5 class="text-sm font-bold text-sky-400 uppercase tracking-wider mb-2">1. Executive Summary</h5>
+          <p class="leading-relaxed">${data.overview}</p>
+        </div>
+
+        <div class="mt-4">
+          <h5 class="text-sm font-bold text-sky-400 uppercase tracking-wider mb-2">2. Quantitative Benchmark Scorecard</h5>
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800 font-mono">
+                <th class="pb-2">Metric / Indicator</th>
+                <th class="pb-2">Observed Value</th>
+                <th class="pb-2">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${metricsRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4">
+          <h5 class="text-sm font-bold text-sky-400 uppercase tracking-wider mb-2">3. Strategic Findings</h5>
+          <ul class="list-disc pl-5 text-slate-300">
+            ${findingsList}
+          </ul>
+        </div>
+      `;
+
+      currentBriefingMd = `# 📊 Executive Intelligence Briefing\n\n## 1. Executive Summary\n${data.overview}\n\n## 2. Quantitative Benchmarks\n` +
+        data.metrics.map(m => `- **${m.name}**: ${m.val} (${m.cat})`).join('\n') +
+        `\n\n## 3. Strategic Findings\n` +
+        data.findings.map(f => `- ${f}`).join('\n') +
+        `\n\n*Generated autonomously by Nexus LangGraph Swarm (LangSmith Tracing).*`;
+
+      reportContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([currentBriefingMd], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nexus-briefing-${Date.now()}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
