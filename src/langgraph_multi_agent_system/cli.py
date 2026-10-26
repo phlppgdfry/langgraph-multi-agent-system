@@ -49,11 +49,20 @@ def interactive_configure():
     smith_prompt = "LangSmith API Key (starts with lsv2_pt_)"
     smith_key = Prompt.ask(smith_prompt, default=current_smith_key or None, password=True)
     if smith_key:
+        endpoint = "https://eu.api.smith.langchain.com"
+        try:
+            from langsmith import Client
+            c = Client(api_url="https://api.smith.langchain.com", api_key=smith_key.strip())
+            c.list_projects(limit=1)
+            endpoint = "https://api.smith.langchain.com"
+        except Exception:  # noqa: BLE001
+            pass
+
         set_key(env_path, "LANGCHAIN_TRACING_V2", "true")
-        set_key(env_path, "LANGCHAIN_ENDPOINT", "https://api.smith.langchain.com")
+        set_key(env_path, "LANGCHAIN_ENDPOINT", endpoint)
         set_key(env_path, "LANGCHAIN_API_KEY", smith_key.strip())
         set_key(env_path, "LANGCHAIN_PROJECT", os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system"))
-        console.print("[green]✓ LangSmith tracing credentials saved to .env[/green]")
+        console.print(f"[green]✓ LangSmith tracing credentials saved to .env (Endpoint: {endpoint})[/green]")
 
     current_openai = os.getenv("OPENAI_API_KEY", "")
     openai_key = Prompt.ask("OpenAI API Key (optional, leave blank for offline demo mode)", default=current_openai or None, password=True)

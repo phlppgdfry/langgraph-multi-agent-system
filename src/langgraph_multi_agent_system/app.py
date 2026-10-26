@@ -69,12 +69,18 @@ with st.sidebar:
         "Enable LangSmith Tracing",
         value=bool(os.getenv("LANGCHAIN_TRACING_V2") == "true"),
     )
+    langsmith_endpoint_choice = st.selectbox(
+        "LangSmith Region / Endpoint",
+        ["https://eu.api.smith.langchain.com (Europe)", "https://api.smith.langchain.com (US / Global)"],
+        index=0 if "eu.api" in os.getenv("LANGCHAIN_ENDPOINT", "") else 1,
+    )
+    langsmith_endpoint = langsmith_endpoint_choice.split(" ")[0]
     langsmith_key = st.text_input("LangSmith API Key (lsv2_pt_...)", value=os.getenv("LANGCHAIN_API_KEY", ""), type="password")
     langsmith_project = st.text_input("Project Name", value=os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system"))
 
     if langsmith_enabled and langsmith_key:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
-        os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+        os.environ["LANGCHAIN_ENDPOINT"] = langsmith_endpoint
         os.environ["LANGCHAIN_API_KEY"] = langsmith_key
         os.environ["LANGCHAIN_PROJECT"] = langsmith_project
 
