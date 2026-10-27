@@ -74,7 +74,9 @@ LANGCHAIN_PROJECT="nexus-multi-agent-system"
 The repository defines automated benchmark datasets containing realistic strategic questions and required evaluation criteria:
 
 ```python
-from langgraph_multi_agent_system.langsmith_utils import sync_langsmith_benchmark_dataset
+from langgraph_multi_agent_system.langsmith_utils import (
+    sync_langsmith_benchmark_dataset,
+)
 
 dataset_id = sync_langsmith_benchmark_dataset("nexus-benchmark-dataset")
 ```

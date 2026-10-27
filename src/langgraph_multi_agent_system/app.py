@@ -296,9 +296,37 @@ if launch_btn and task_input:
         st.subheader("📑 Final Executive Decision Briefing")
         st.markdown(final_report)
 
-        st.download_button(
-            label="📥 Download Executive Briefing (.md)",
-            data=final_report,
-            file_name=f"nexus-briefing-{thread_id}.md",
-            mime="text/markdown",
+        from langgraph_multi_agent_system.export_report import (
+            generate_executive_html,
         )
+
+        html_content = generate_executive_html(
+            final_report,
+            title=f"Strategic Intelligence: {task_input}",
+            quality_score=critique_data.get("score", 94),
+            thread_id=thread_id,
+        )
+
+        dl_col1, dl_col2, dl_col3 = st.columns([1, 1, 1])
+        with dl_col1:
+            st.download_button(
+                label="📥 Download Briefing (.md)",
+                data=final_report,
+                file_name=f"nexus-briefing-{thread_id}.md",
+                mime="text/markdown",
+                use_container_width=True,
+            )
+        with dl_col2:
+            st.download_button(
+                label="🌐 Download Styled HTML (.html)",
+                data=html_content,
+                file_name=f"nexus-executive-briefing-{thread_id}.html",
+                mime="text/html",
+                use_container_width=True,
+            )
+        with dl_col3:
+            st.link_button(
+                label="🔍 View in LangSmith",
+                url="https://eu.smith.langchain.com/",
+                use_container_width=True,
+            )

@@ -6,7 +6,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-v1.2%2B-8A2BE2.svg)](https://langchain-ai.github.io/langgraph/)
 [![LangSmith](https://img.shields.io/badge/LangSmith-Tracing%20%26%20Evals-FF6C37.svg)](https://smith.langchain.com/)
 [![Persistence](https://img.shields.io/badge/Checkpointer-SQLite%20%2B%20Memory-003B57.svg?logo=sqlite&logoColor=white)](https://sqlite.org/)
-[![Tests](https://img.shields.io/badge/tests-13%20passed-22C55E.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-22%20passed-22C55E.svg)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 [![Notebook](https://img.shields.io/badge/Jupyter-Masterclass-F37626.svg?logo=jupyter&logoColor=white)](notebooks/langgraph_multi_agent_masterclass.ipynb)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -206,7 +206,7 @@ Pre-generated reports produced autonomously by Nexus are available under [`examp
 The repository maintains 100% pass rates across unit tests and linter checks:
 
 ```bash
-# Run pytest test suite (8 tests)
+# Run pytest test suite (22 unit & integration tests)
 uv run pytest -v
 
 # Run ruff code linter

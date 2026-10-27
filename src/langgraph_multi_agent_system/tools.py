@@ -90,18 +90,31 @@ def extract_metrics(text: str) -> list[dict[str, Any]]:
         List of identified metrics with label, value, and context.
     """
     metrics = []
-    # Match percentages
-    percent_matches = re.findall(r"(\d+(?:\.\d+)?%)\s*([a-zA-Z\s]{4,30})", text)
+
+    # Match percentages (+42%, -15.5%, 38%)
+    percent_matches = re.findall(r"([+-]?\d+(?:\.\d+)?%)\s*([a-zA-Z\s]{4,30})", text)
     for val, label in percent_matches:
         metrics.append({"metric": label.strip(), "value": val, "type": "percentage"})
 
-    # Match currency
+    # Match currency ($12M, $3.5 billion, $500k)
     money_matches = re.findall(
-        r"(\$\d+(?:\.\d+)?\s*(?:billion|million|k|B|M)?)\s*([a-zA-Z\s]{4,30})",
+        r"(\$[+-]?\d+(?:\.\d+)?\s*(?:billion|million|trillion|k|B|M)?)\s*([a-zA-Z\s]{4,30})",
         text,
     )
     for val, label in money_matches:
         metrics.append({"metric": label.strip(), "value": val, "type": "financial"})
+
+    # Match multipliers & speedups (2.5x, 10x throughput)
+    multiplier_matches = re.findall(r"([+-]?\d+(?:\.\d+)?x)\s*([a-zA-Z\s]{4,30})", text)
+    for val, label in multiplier_matches:
+        metrics.append({"metric": label.strip(), "value": val, "type": "performance"})
+
+    # Match latency / time benchmarks (120ms, 4.2 seconds)
+    time_matches = re.findall(
+        r"(\d+(?:\.\d+)?\s*(?:ms|seconds|minutes|hours))\s*([a-zA-Z\s]{4,30})", text
+    )
+    for val, label in time_matches:
+        metrics.append({"metric": label.strip(), "value": val, "type": "performance"})
 
     if not metrics:
         metrics = [
