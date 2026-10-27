@@ -55,7 +55,7 @@ def interactive_configure():
             c = Client(api_url="https://api.smith.langchain.com", api_key=smith_key.strip())
             c.list_projects(limit=1)
             endpoint = "https://api.smith.langchain.com"
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S110
             pass
 
         set_key(env_path, "LANGCHAIN_TRACING_V2", "true")
@@ -207,12 +207,47 @@ def main():
     parser.add_argument("--output", "-o", type=str, help="Save final markdown report to file")
     parser.add_argument("--configure", action="store_true", help="Launch interactive configuration wizard for LangSmith and API keys")
     parser.add_argument("--list-threads", action="store_true", help="List saved checkpoint thread sessions from SQLite store")
+    parser.add_argument("--time-travel", type=str, metavar="THREAD_ID", help="Inspect chronological checkpoint history for a thread")
+    parser.add_argument("--memory-search", type=str, metavar="QUERY", help="Search cross-thread long-term BaseStore memory")
     parser.add_argument("--evals", action="store_true", help="Run automated LangSmith benchmark evaluation suite")
 
     args = parser.parse_args()
 
     if args.configure:
         interactive_configure()
+        return
+
+    if args.time_travel:
+        from langgraph_multi_agent_system.time_travel import (
+            format_history_table,
+            get_checkpoint_history,
+        )
+        app = create_graph()
+        history = get_checkpoint_history(app, args.time_travel)
+        if not history:
+            console.print(f"[yellow]No checkpoint snapshots found for thread '{args.time_travel}'.[/yellow]")
+        else:
+            table = Table(title=f"⏳ Time-Travel History: Thread '{args.time_travel}'", border_style="cyan")
+            table.add_column("Checkpoint ID", style="bold green")
+            table.add_column("Next Node(s)", style="bold yellow")
+            table.add_column("Target Agent", style="cyan")
+            table.add_column("Task Excerpt", style="dim")
+            for row in format_history_table(history):
+                table.add_row(*row)
+            console.print(table)
+        return
+
+    if args.memory_search:
+        from langgraph_multi_agent_system.memory_store import (
+            get_shared_store,
+            recall_prior_knowledge,
+        )
+        store = get_shared_store()
+        recalled = recall_prior_knowledge(store, args.memory_search)
+        if not recalled:
+            console.print(f"[yellow]No memories found matching '{args.memory_search}'.[/yellow]")
+        else:
+            console.print(Panel(f"[bold cyan]Cross-Thread Memories for '{args.memory_search}':[/bold cyan]\n{recalled}", border_style="cyan"))
         return
 
     if args.list_threads:

@@ -12,6 +12,7 @@ from langgraph_multi_agent_system.agents.researcher import researcher_node
 from langgraph_multi_agent_system.agents.supervisor import supervisor_node
 from langgraph_multi_agent_system.agents.writer import writer_node
 from langgraph_multi_agent_system.checkpoint import get_checkpointer
+from langgraph_multi_agent_system.memory_store import get_shared_store
 from langgraph_multi_agent_system.state import AgentState
 
 
@@ -84,10 +85,15 @@ def create_graph(
     if checkpointer is None:
         checkpointer = get_checkpointer()
 
+    store = compile_kwargs.pop("store", None)
+    if store is None:
+        store = get_shared_store()
+
     interrupt_before = ["human_gate"] if interrupt_on_human_gate else None
 
     return workflow.compile(
         checkpointer=checkpointer,
+        store=store,
         interrupt_before=interrupt_before,
         **compile_kwargs,
     )

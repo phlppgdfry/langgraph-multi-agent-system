@@ -1,0 +1,17 @@
+services:
+  nexus-swarm:
+    build: .
+    container_name: nexus-multi-agent-system
+    ports:
+      - "8501:8501"
+    environment:
+      - LANGCHAIN_TRACING_V2=true
+      - LANGCHAIN_ENDPOINT=https://eu.api.smith.langchain.com
+      - LANGCHAIN_PROJECT=nexus-multi-agent-system
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - PERSISTENCE_BACKEND=sqlite
+      - SQLITE_DB_PATH=/app/data/swarm_checkpoints.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

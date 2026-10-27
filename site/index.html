@@ -73,6 +73,7 @@
       <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
         <a href="#simulator" class="hover:text-sky-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-play text-xs text-sky-400"></i> Simulator</a>
         <a href="#architecture" class="hover:text-sky-400 transition-colors">Architecture</a>
+        <a href="#timetravel" class="hover:text-sky-400 transition-colors">Time-Travel & Memory</a>
         <a href="#observability" class="hover:text-sky-400 transition-colors">LangSmith Tracing</a>
         <a href="#benchmarks" class="hover:text-sky-400 transition-colors">Benchmarks</a>
         <a href="#quickstart" class="hover:text-sky-400 transition-colors">Quickstart</a>
@@ -123,8 +124,9 @@
       <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">Python 3.11 | 3.12 | 3.13</span>
       <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">LangGraph v1.2+</span>
       <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">LangSmith Tracing</span>
-      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">SQLite & MemorySaver</span>
-      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md text-emerald-400">8/8 Tests Passing ✓</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">BaseStore Long-Term Memory</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md">Time-Travel Rewind</span>
+      <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-md text-emerald-400">10/10 Tests Passing ✓</span>
     </div>
   </section>
 
@@ -363,6 +365,75 @@
           Output: C-Level Markdown Report
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Time-Travel & Cross-Thread Memory Section -->
+  <section id="timetravel" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="text-purple-400 text-xs font-bold uppercase tracking-wider mb-2">Next-Gen LangGraph Features</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Time-Travel Replay & Long-Term Memory</h2>
+      <p class="text-slate-400 mt-4 text-base">
+        Nexus harnesses cutting-edge LangGraph v1.2 capabilities that traditional prompt architectures cannot match: immutable checkpoint rewinding and cross-thread semantic memory stores.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Time Travel Card -->
+      <div class="glass-card rounded-2xl p-8 border border-slate-800">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white">Time-Travel & State History</h3>
+            <span class="text-xs font-mono text-purple-400">app.get_state_history(config)</span>
+          </div>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Every node transition is persisted as an immutable checkpoint in SQLite. Operators can inspect the exact historical state at step 2 or step 4, modify input parameters, and fork execution along a new branch without re-running earlier expensive stages.
+        </p>
+        <div class="mt-5 bg-slate-950 rounded-xl p-4 font-mono text-xs text-slate-300 border border-slate-800 select-all">
+          <span class="text-slate-500"># Inspect checkpoint timeline via CLI</span><br>
+          <span class="text-sky-400">uv run python</span> -m langgraph_multi_agent_system.cli --time-travel &lt;THREAD_ID&gt;
+        </div>
+      </div>
+
+      <!-- Long-Term Memory Card -->
+      <div class="glass-card rounded-2xl p-8 border border-slate-800">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white">Cross-Thread Long-Term Memory</h3>
+            <span class="text-xs font-mono text-sky-400">langgraph.store.base.BaseStore</span>
+          </div>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Checkpointers manage state <em>within</em> a single thread, but LangGraph's <code class="text-sky-300">BaseStore</code> provides cross-session recall. Past research discoveries, domain benchmarks, and operator preferences are recalled across completely different threads.
+        </p>
+        <div class="mt-5 bg-slate-950 rounded-xl p-4 font-mono text-xs text-slate-300 border border-slate-800 select-all">
+          <span class="text-slate-500"># Search shared memory store via CLI</span><br>
+          <span class="text-sky-400">uv run python</span> -m langgraph_multi_agent_system.cli --memory-search "LangGraph"
+        </div>
+      </div>
+    </div>
+
+    <!-- Masterclass Notebook Banner -->
+    <div class="mt-8 glass-card rounded-2xl p-6 sm:p-8 border border-purple-500/30 bg-gradient-to-r from-purple-950/30 to-slate-900/60 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-2xl flex-shrink-0">
+          📓
+        </div>
+        <div>
+          <h4 class="text-lg font-bold text-white">Interactive Jupyter Masterclass Notebook</h4>
+          <p class="text-xs text-slate-400 mt-1">Step-by-step code tutorial: state manipulation, checkpoint rewinding, and live LangSmith trace querying.</p>
+        </div>
+      </div>
+      <a href="https://github.com/phlppgdfry/langgraph-multi-agent-system/blob/main/notebooks/langgraph_multi_agent_masterclass.ipynb" target="_blank" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-colors flex items-center gap-2 whitespace-nowrap shadow-lg shadow-purple-500/20">
+        <i class="fa-solid fa-book-open"></i> Open Masterclass Notebook
+      </a>
     </div>
   </section>
 
