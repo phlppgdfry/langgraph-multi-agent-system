@@ -22,5 +22,7 @@ def human_gate_node(state: AgentState) -> dict[str, Any]:
     return {
         "human_approved": approved,
         "next_agent": "writer" if approved else "supervisor",
-        "messages": [AIMessage(content=f"[HumanGate] Executive review completed: {status_str}.")]
+        "messages": [
+            AIMessage(content=f"[HumanGate] Executive review completed: {status_str}.")
+        ],
     }

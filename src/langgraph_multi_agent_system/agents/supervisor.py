@@ -56,21 +56,33 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
     if not research_notes:
         return {
             "next_agent": "researcher",
-            "messages": [AIMessage(content="[Supervisor] Routing to Researcher for primary data collection.")]
+            "messages": [
+                AIMessage(
+                    content="[Supervisor] Routing to Researcher for primary data collection."
+                )
+            ],
         }
 
     # If research done but no quantitative analysis -> analyst
     if not quantitative_data:
         return {
             "next_agent": "analyst",
-            "messages": [AIMessage(content="[Supervisor] Research complete. Routing to Analyst for quantitative metrics.")]
+            "messages": [
+                AIMessage(
+                    content="[Supervisor] Research complete. Routing to Analyst for quantitative metrics."
+                )
+            ],
         }
 
     # If quantitative done but no critique -> critic
     if not critique:
         return {
             "next_agent": "critic",
-            "messages": [AIMessage(content="[Supervisor] Quantitative analysis complete. Routing to Critic for self-reflection evaluation.")]
+            "messages": [
+                AIMessage(
+                    content="[Supervisor] Quantitative analysis complete. Routing to Critic for self-reflection evaluation."
+                )
+            ],
         }
 
     # If critique requested revision and within max revisions
@@ -80,7 +92,11 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
         return {
             "next_agent": "researcher",
             "revision_count": revision_count + 1,
-            "messages": [AIMessage(content=f"[Supervisor] Critique score ({critique.get('score')}/100) below threshold. Initiating revision cycle #{revision_count + 1}.")]
+            "messages": [
+                AIMessage(
+                    content=f"[Supervisor] Critique score ({critique.get('score')}/100) below threshold. Initiating revision cycle #{revision_count + 1}."
+                )
+            ],
         }
 
     # Check if human approval is required
@@ -89,11 +105,19 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
     if requires_approval and approved is None:
         return {
             "next_agent": "human_gate",
-            "messages": [AIMessage(content="[Supervisor] Quality checks passed. Routing to Human Gatekeeper for executive review.")]
+            "messages": [
+                AIMessage(
+                    content="[Supervisor] Quality checks passed. Routing to Human Gatekeeper for executive review."
+                )
+            ],
         }
 
     # Ready for final executive writing
     return {
         "next_agent": "writer",
-        "messages": [AIMessage(content="[Supervisor] All verification stages passed. Routing to Executive Writer.")]
+        "messages": [
+            AIMessage(
+                content="[Supervisor] All verification stages passed. Routing to Executive Writer."
+            )
+        ],
     }

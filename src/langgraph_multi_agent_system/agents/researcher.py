@@ -25,12 +25,14 @@ def researcher_node(state: AgentState) -> dict[str, Any]:
         results = search_web.invoke({"query": query})
         new_notes = list(existing_notes)
         for item in results:
-            new_notes.append({
-                "title": item.get("title", ""),
-                "snippet": item.get("snippet", ""),
-                "source": item.get("source", ""),
-                "category": "evidence",
-            })
+            new_notes.append(
+                {
+                    "title": item.get("title", ""),
+                    "snippet": item.get("snippet", ""),
+                    "source": item.get("source", ""),
+                    "category": "evidence",
+                }
+            )
         msg = f"[Researcher] Sourced {len(results)} additional data points addressing critic recommendations."
     elif subtasks:
         # Parallel Map-Reduce Fan-out
@@ -41,12 +43,14 @@ def researcher_node(state: AgentState) -> dict[str, Any]:
         results = search_web.invoke({"query": task})
         new_notes = list(existing_notes)
         for item in results:
-            new_notes.append({
-                "title": item.get("title", ""),
-                "snippet": item.get("snippet", ""),
-                "source": item.get("source", ""),
-                "category": "evidence",
-            })
+            new_notes.append(
+                {
+                    "title": item.get("title", ""),
+                    "snippet": item.get("snippet", ""),
+                    "source": item.get("source", ""),
+                    "category": "evidence",
+                }
+            )
         msg = f"[Researcher] Sourced {len(results)} verified data points across primary repositories."
 
     return {

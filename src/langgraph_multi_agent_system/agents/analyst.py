@@ -32,5 +32,5 @@ def analyst_node(state: AgentState) -> dict[str, Any]:
     return {
         "quantitative_data": metrics,
         "next_agent": "supervisor",
-        "messages": [AIMessage(content=msg)]
+        "messages": [AIMessage(content=msg)],
     }

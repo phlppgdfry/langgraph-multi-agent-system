@@ -33,7 +33,9 @@ st.markdown(
 # ------------------------------------------------------------------------------
 with st.sidebar:
     st.title("⚙️ Swarm Configuration")
-    st.markdown("Configure LLM providers, LangSmith tracing, and governance parameters.")
+    st.markdown(
+        "Configure LLM providers, LangSmith tracing, and governance parameters."
+    )
 
     provider = st.selectbox(
         "Model Provider",
@@ -43,20 +45,36 @@ with st.sidebar:
     )
 
     if provider == "openai":
-        openai_key = st.text_input("OpenAI API Key", value=os.getenv("OPENAI_API_KEY", ""), type="password")
-        model_name = st.selectbox("OpenAI Model", ["gpt-4o-mini", "gpt-4o", "o1-mini"], index=0)
+        openai_key = st.text_input(
+            "OpenAI API Key", value=os.getenv("OPENAI_API_KEY", ""), type="password"
+        )
+        model_name = st.selectbox(
+            "OpenAI Model", ["gpt-4o-mini", "gpt-4o", "o1-mini"], index=0
+        )
         if openai_key:
             os.environ["OPENAI_API_KEY"] = openai_key
             os.environ["DEFAULT_MODEL_NAME"] = model_name
     elif provider == "anthropic":
-        anthropic_key = st.text_input("Anthropic API Key", value=os.getenv("ANTHROPIC_API_KEY", ""), type="password")
-        model_name = st.selectbox("Claude Model", ["claude-3-5-haiku-latest", "claude-3-5-sonnet-latest"], index=0)
+        anthropic_key = st.text_input(
+            "Anthropic API Key",
+            value=os.getenv("ANTHROPIC_API_KEY", ""),
+            type="password",
+        )
+        model_name = st.selectbox(
+            "Claude Model",
+            ["claude-3-5-haiku-latest", "claude-3-5-sonnet-latest"],
+            index=0,
+        )
         if anthropic_key:
             os.environ["ANTHROPIC_API_KEY"] = anthropic_key
             os.environ["DEFAULT_MODEL_NAME"] = model_name
     elif provider == "google":
-        google_key = st.text_input("Google AI Key", value=os.getenv("GOOGLE_API_KEY", ""), type="password")
-        model_name = st.selectbox("Gemini Model", ["gemini-1.5-flash", "gemini-1.5-pro"], index=0)
+        google_key = st.text_input(
+            "Google AI Key", value=os.getenv("GOOGLE_API_KEY", ""), type="password"
+        )
+        model_name = st.selectbox(
+            "Gemini Model", ["gemini-1.5-flash", "gemini-1.5-pro"], index=0
+        )
         if google_key:
             os.environ["GOOGLE_API_KEY"] = google_key
             os.environ["DEFAULT_MODEL_NAME"] = model_name
@@ -71,12 +89,21 @@ with st.sidebar:
     )
     langsmith_endpoint_choice = st.selectbox(
         "LangSmith Region / Endpoint",
-        ["https://eu.api.smith.langchain.com (Europe)", "https://api.smith.langchain.com (US / Global)"],
+        [
+            "https://eu.api.smith.langchain.com (Europe)",
+            "https://api.smith.langchain.com (US / Global)",
+        ],
         index=0 if "eu.api" in os.getenv("LANGCHAIN_ENDPOINT", "") else 1,
     )
     langsmith_endpoint = langsmith_endpoint_choice.split(" ")[0]
-    langsmith_key = st.text_input("LangSmith API Key (lsv2_pt_...)", value=os.getenv("LANGCHAIN_API_KEY", ""), type="password")
-    langsmith_project = st.text_input("Project Name", value=os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system"))
+    langsmith_key = st.text_input(
+        "LangSmith API Key (lsv2_pt_...)",
+        value=os.getenv("LANGCHAIN_API_KEY", ""),
+        type="password",
+    )
+    langsmith_project = st.text_input(
+        "Project Name", value=os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system")
+    )
 
     if langsmith_enabled and langsmith_key:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
@@ -96,8 +123,14 @@ with st.sidebar:
 # ------------------------------------------------------------------------------
 # Main Dashboard
 # ------------------------------------------------------------------------------
-st.markdown("<div class='main-header'>🤖 Nexus: Autonomous Multi-Agent Swarm</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-header'>Stateful Graph Orchestration • Reflection Self-Correction • LangSmith Observability • Human-in-the-Loop</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='main-header'>🤖 Nexus: Autonomous Multi-Agent Swarm</div>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<div class='sub-header'>Stateful Graph Orchestration • Reflection Self-Correction • LangSmith Observability • Human-in-the-Loop</div>",
+    unsafe_allow_html=True,
+)
 
 # Architecture Tab Viewer
 with st.expander("🗺️ View Multi-Agent StateGraph Architecture Topology", expanded=False):
@@ -167,7 +200,9 @@ if launch_btn and task_input:
         "metadata": {"thread_id": thread_id, "provider": provider},
     }
 
-    st.info(f"**Swarm Session Initialized:** Thread `{thread_id}` | Checkpointer: `SQLite` | Observability: `LangSmith`")
+    st.info(
+        f"**Swarm Session Initialized:** Thread `{thread_id}` | Checkpointer: `SQLite` | Observability: `LangSmith`"
+    )
 
     status_container = st.status("Swarm actively orchestrating...", expanded=True)
 
@@ -184,7 +219,9 @@ if launch_btn and task_input:
                 status_container.write(f"📈 **Analyst:** {msg_text}")
             elif node_name == "critic":
                 score = state_update.get("critique", {}).get("score", "N/A")
-                status_container.write(f"⚖️ **Critic (Quality Score: {score}/100):** {msg_text}")
+                status_container.write(
+                    f"⚖️ **Critic (Quality Score: {score}/100):** {msg_text}"
+                )
             elif node_name == "human_gate":
                 status_container.write(f"🛡️ **Human Gate:** {msg_text}")
             elif node_name == "writer":
@@ -195,20 +232,36 @@ if launch_btn and task_input:
     # Check for Human-in-the-Loop Interruption
     if human_approval and full_state.get("next_agent") == "human_gate":
         status_container.warning("⚠️ **Execution Paused at Human-in-the-Loop Gate**")
-        st.warning("Review the findings below. Click 'Approve & Synthesize' to authorize final briefing publication.")
-        
+        st.warning(
+            "Review the findings below. Click 'Approve & Synthesize' to authorize final briefing publication."
+        )
+
         col_app1, col_app2 = st.columns(2)
         with col_app1:
-            if st.button("✅ Approve & Synthesize Report", type="primary", use_container_width=True):
-                app.update_state(config, {"human_approved": True, "next_agent": "writer"})
+            if st.button(
+                "✅ Approve & Synthesize Report",
+                type="primary",
+                use_container_width=True,
+            ):
+                app.update_state(
+                    config, {"human_approved": True, "next_agent": "writer"}
+                )
                 for out in app.stream(None, config=config):
                     for n, upd in out.items():
-                        st.write(f"✍️ **{n.upper()}:** {upd.get('messages', [{}])[-1].content}")
+                        st.write(
+                            f"✍️ **{n.upper()}:** {upd.get('messages', [{}])[-1].content}"
+                        )
                 full_state = app.get_state(config).values
-                status_container.update(label="✅ Swarm Execution Complete!", state="complete", expanded=False)
+                status_container.update(
+                    label="✅ Swarm Execution Complete!",
+                    state="complete",
+                    expanded=False,
+                )
 
     else:
-        status_container.update(label="✅ Swarm Execution Complete!", state="complete", expanded=False)
+        status_container.update(
+            label="✅ Swarm Execution Complete!", state="complete", expanded=False
+        )
 
     # --------------------------------------------------------------------------
     # Results & Metrics Presentation
@@ -223,13 +276,17 @@ if launch_btn and task_input:
     with c3:
         st.metric("Reflection Cycles", full_state.get("revision_count", 0))
     with c4:
-        st.metric("HITL Status", "Approved" if full_state.get("human_approved") else "Bypassed")
+        st.metric(
+            "HITL Status",
+            "Approved" if full_state.get("human_approved") else "Bypassed",
+        )
 
     # Quantitative Scorecard
     metrics_list = full_state.get("quantitative_data", [])
     if metrics_list:
         st.subheader("📊 Quantitative Intelligence Scorecard")
         import pandas as pd
+
         df = pd.DataFrame(metrics_list)
         st.dataframe(df, use_container_width=True)
 

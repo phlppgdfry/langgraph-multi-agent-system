@@ -17,13 +17,19 @@ def markdown_to_clean_html(md_text: str) -> str:
 
         # Headers
         if stripped.startswith("# "):
-            html_lines.append(f"<h1 class='report-title'>{html.escape(stripped[2:])}</h1>")
+            html_lines.append(
+                f"<h1 class='report-title'>{html.escape(stripped[2:])}</h1>"
+            )
             continue
         elif stripped.startswith("## "):
-            html_lines.append(f"<h2 class='section-heading'>{html.escape(stripped[3:])}</h2>")
+            html_lines.append(
+                f"<h2 class='section-heading'>{html.escape(stripped[3:])}</h2>"
+            )
             continue
         elif stripped.startswith("### "):
-            html_lines.append(f"<h3 class='sub-heading'>{html.escape(stripped[4:])}</h3>")
+            html_lines.append(
+                f"<h3 class='sub-heading'>{html.escape(stripped[4:])}</h3>"
+            )
             continue
         elif stripped.startswith("---"):
             html_lines.append("<hr class='divider'/>")
@@ -33,7 +39,9 @@ def markdown_to_clean_html(md_text: str) -> str:
         if "|" in stripped:
             if not in_table:
                 in_table = True
-                html_lines.append("<div class='table-container'><table class='styled-table'>")
+                html_lines.append(
+                    "<div class='table-container'><table class='styled-table'>"
+                )
             cols = [c.strip() for c in stripped.split("|")[1:-1]]
             if all(set(c) <= {"-", ":", " "} for c in cols):
                 continue  # Header divider line
@@ -173,7 +181,9 @@ def generate_executive_html(
 </html>"""
 
 
-def save_executive_html_file(report_markdown: str, output_path: str, quality_score: int = 96) -> str:
+def save_executive_html_file(
+    report_markdown: str, output_path: str, quality_score: int = 96
+) -> str:
     """Save formatted HTML briefing to disk."""
     html_content = generate_executive_html(report_markdown, quality_score=quality_score)
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)

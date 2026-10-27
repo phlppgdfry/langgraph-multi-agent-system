@@ -28,7 +28,9 @@ def get_shared_store() -> BaseStore:
     return _GLOBAL_STORE
 
 
-def recall_prior_knowledge(store: BaseStore, query: str, limit: int = 3) -> list[dict[str, Any]]:
+def recall_prior_knowledge(
+    store: BaseStore, query: str, limit: int = 3
+) -> list[dict[str, Any]]:
     """Search long-term memory for past findings and strategic insights."""
     try:
         items = store.search(("knowledge",), query=query, limit=limit)

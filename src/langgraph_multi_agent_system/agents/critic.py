@@ -20,10 +20,9 @@ def critic_node(state: AgentState) -> dict[str, Any]:
     revision_count = state.get("revision_count", 0)
 
     sources = [n.get("source", "") for n in notes]
-    verification = verify_claim.invoke({
-        "claim": f"Primary findings on {task}",
-        "sources": sources
-    })
+    verification = verify_claim.invoke(
+        {"claim": f"Primary findings on {task}", "sources": sources}
+    )
 
     # Scoring heuristic
     base_score = 70
@@ -51,9 +50,9 @@ def critic_node(state: AgentState) -> dict[str, Any]:
         "strengths": [
             f"Verified against {len(notes)} sources",
             f"Quantified with {len(metrics)} concrete data indicators",
-            "Structured multi-step reasoning"
+            "Structured multi-step reasoning",
         ],
-        "recommendation": feedback
+        "recommendation": feedback,
     }
 
     llm = get_llm()
@@ -73,5 +72,5 @@ def critic_node(state: AgentState) -> dict[str, Any]:
     return {
         "critique": critique_result,
         "next_agent": "supervisor",
-        "messages": [AIMessage(content=msg)]
+        "messages": [AIMessage(content=msg)],
     }

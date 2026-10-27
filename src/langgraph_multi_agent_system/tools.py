@@ -32,11 +32,13 @@ def search_web(query: str) -> list[dict[str, str]]:
             raw_results = list(ddgs.text(query, max_results=4))
             results = []
             for r in raw_results:
-                results.append({
-                    "title": r.get("title", "No Title"),
-                    "snippet": r.get("body", ""),
-                    "source": r.get("href", "web"),
-                })
+                results.append(
+                    {
+                        "title": r.get("title", "No Title"),
+                        "snippet": r.get("body", ""),
+                        "source": r.get("href", "web"),
+                    }
+                )
             if results:
                 return results
     except Exception:  # noqa: BLE001, S110
@@ -103,10 +105,22 @@ def extract_metrics(text: str) -> list[dict[str, Any]]:
 
     if not metrics:
         metrics = [
-            {"metric": "Research Latency Reduction", "value": "38.2%", "type": "performance"},
-            {"metric": "Factual Verification Score", "value": "94.8%", "type": "accuracy"},
+            {
+                "metric": "Research Latency Reduction",
+                "value": "38.2%",
+                "type": "performance",
+            },
+            {
+                "metric": "Factual Verification Score",
+                "value": "94.8%",
+                "type": "accuracy",
+            },
             {"metric": "Cost Efficiency Improvement", "value": "+37.5%", "type": "roi"},
-            {"metric": "Autonomous Reflection Cycles", "value": "2.4 avg", "type": "observability"},
+            {
+                "metric": "Autonomous Reflection Cycles",
+                "value": "2.4 avg",
+                "type": "observability",
+            },
         ]
     return metrics
 
@@ -186,7 +200,9 @@ class MockChatModel(BaseChatModel):
                 "deliver measurable performance gains and auditable decision trees across enterprise workloads."
             )
 
-        return ChatResult(generations=[ChatGeneration(message=AIMessage(content=reply))])
+        return ChatResult(
+            generations=[ChatGeneration(message=AIMessage(content=reply))]
+        )
 
     @property
     def _llm_type(self) -> str:
@@ -217,7 +233,9 @@ def get_llm(
             try:
                 from langchain_openai import ChatOpenAI
 
-                target_model = model_name or os.getenv("DEFAULT_MODEL_NAME") or "gpt-4o-mini"
+                target_model = (
+                    model_name or os.getenv("DEFAULT_MODEL_NAME") or "gpt-4o-mini"
+                )
                 return ChatOpenAI(
                     model=target_model,
                     temperature=temperature,

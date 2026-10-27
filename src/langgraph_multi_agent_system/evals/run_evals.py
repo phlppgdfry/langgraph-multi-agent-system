@@ -39,14 +39,17 @@ BENCHMARK_DATASET = [
 # ------------------------------------------------------------------------------
 # Custom Evaluator Functions
 # ------------------------------------------------------------------------------
-def evaluate_completeness(run_output: dict[str, Any], example: dict[str, Any]) -> dict[str, Any]:
+def evaluate_completeness(
+    run_output: dict[str, Any], example: dict[str, Any]
+) -> dict[str, Any]:
     """Verify that all essential report sections and topic requirements are present."""
     report = run_output.get("final_report", "")
     expected = example.get("expected_topics", [])
     task_context = example.get("task", "")
 
     found_topics = [
-        t for t in expected
+        t
+        for t in expected
         if t.lower() in report.lower() or t.lower() in task_context.lower()
     ]
     score = len(found_topics) / len(expected) if expected else 1.0
@@ -58,7 +61,9 @@ def evaluate_completeness(run_output: dict[str, Any], example: dict[str, Any]) -
     }
 
 
-def evaluate_critic_rigor(run_output: dict[str, Any], example: dict[str, Any]) -> dict[str, Any]:
+def evaluate_critic_rigor(
+    run_output: dict[str, Any], example: dict[str, Any]
+) -> dict[str, Any]:
     """Verify that the self-correction critic assigned an acceptable score."""
     critique = run_output.get("critique", {})
     score = critique.get("score", 0)
@@ -72,7 +77,9 @@ def evaluate_critic_rigor(run_output: dict[str, Any], example: dict[str, Any]) -
     }
 
 
-def evaluate_quantitative_data(run_output: dict[str, Any], example: dict[str, Any]) -> dict[str, Any]:
+def evaluate_quantitative_data(
+    run_output: dict[str, Any], example: dict[str, Any]
+) -> dict[str, Any]:
     """Check that quantitative data points and benchmark metrics were extracted."""
     metrics = run_output.get("quantitative_data", [])
     has_metrics = len(metrics) >= 2
@@ -91,7 +98,9 @@ def run_benchmark_evals():
     print("=" * 70)
     print("🧪 Running Nexus LangSmith Evaluation Suite")
     print(f"Observability active: {os.getenv('LANGCHAIN_TRACING_V2', 'false')}")
-    print(f"Target LangSmith Project: {os.getenv('LANGCHAIN_PROJECT', 'nexus-multi-agent-system')}")
+    print(
+        f"Target LangSmith Project: {os.getenv('LANGCHAIN_PROJECT', 'nexus-multi-agent-system')}"
+    )
     print("=" * 70)
 
     app = create_graph()
@@ -137,15 +146,19 @@ def run_benchmark_evals():
         print(f"  ✓ {e2['key']}: {e2['score'] * 100:.1f}% ({e2['comment']})")
         print(f"  ✓ {e3['key']}: {e3['score'] * 100:.1f}% ({e3['comment']})")
 
-        results.append({
-            "task": task,
-            "evals": [e1, e2, e3],
-            "passed": all(e["score"] >= 0.60 for e in [e1, e2, e3]),
-        })
+        results.append(
+            {
+                "task": task,
+                "evals": [e1, e2, e3],
+                "passed": all(e["score"] >= 0.60 for e in [e1, e2, e3]),
+            }
+        )
 
     all_passed = all(r["passed"] for r in results)
     print("\n" + "=" * 70)
-    print(f"Evaluation Summary: {'ALL TESTS PASSED ✅' if all_passed else 'SOME EVALS FAILED ⚠️'}")
+    print(
+        f"Evaluation Summary: {'ALL TESTS PASSED ✅' if all_passed else 'SOME EVALS FAILED ⚠️'}"
+    )
     print("Traces and evaluation spans synced to your LangSmith project.")
     print("=" * 70)
     return all_passed

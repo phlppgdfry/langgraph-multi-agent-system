@@ -43,6 +43,7 @@ htmlcov/
 .langgraph_api/
 .langgraph/
 data/*.db
+data/*.html
 briefing*.md
 
 # IDE & OS

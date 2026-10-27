@@ -15,17 +15,21 @@ def execute_subtask_research(subtask: str, task: str) -> list[dict[str, Any]]:
 
     notes = []
     for r in results:
-        notes.append({
-            "title": r.get("title", "Source"),
-            "snippet": r.get("snippet", ""),
-            "source": r.get("source", "web"),
-            "subtask": subtask,
-            "category": "parallel_worker_evidence",
-        })
+        notes.append(
+            {
+                "title": r.get("title", "Source"),
+                "snippet": r.get("snippet", ""),
+                "source": r.get("source", "web"),
+                "subtask": subtask,
+                "category": "parallel_worker_evidence",
+            }
+        )
     return notes
 
 
-def parallel_research_coordinator(task: str, subtasks: list[str]) -> tuple[list[dict[str, Any]], str]:
+def parallel_research_coordinator(
+    task: str, subtasks: list[str]
+) -> tuple[list[dict[str, Any]], str]:
     """Execute multiple specialized research workers in parallel (Map-Reduce pattern).
 
     Args:

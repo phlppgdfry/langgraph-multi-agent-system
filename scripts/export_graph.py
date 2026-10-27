@@ -9,7 +9,9 @@ def export_graph_assets():
     app = create_graph()
     mermaid_code = app.get_graph().draw_mermaid()
 
-    assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../docs/assets"))
+    assets_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../docs/assets")
+    )
     os.makedirs(assets_dir, exist_ok=True)
 
     mermaid_file = os.path.join(assets_dir, "architecture.mermaid")

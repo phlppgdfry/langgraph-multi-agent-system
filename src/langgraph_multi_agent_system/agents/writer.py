@@ -19,15 +19,22 @@ def writer_node(state: AgentState) -> dict[str, Any]:
     revisions = state.get("revision_count", 0)
 
     # Format metrics table
-    table_data = [[m.get("metric", "-"), m.get("value", "-"), m.get("type", "-")] for m in metrics]
+    table_data = [
+        [m.get("metric", "-"), m.get("value", "-"), m.get("type", "-")] for m in metrics
+    ]
     metrics_table = tabulate(
         table_data,
         headers=["Indicator / Benchmark", "Observed Value", "Category"],
-        tablefmt="github"
+        tablefmt="github",
     )
 
     # Sources citations
-    sources_md = "\n".join([f"- **{n.get('title', 'Source')}**: {n.get('source', 'Internal')} — *\"{n.get('snippet', '')[:120]}...\"*" for n in notes[:5]])
+    sources_md = "\n".join(
+        [
+            f'- **{n.get("title", "Source")}**: {n.get("source", "Internal")} — *"{n.get("snippet", "")[:120]}..."*'
+            for n in notes[:5]
+        ]
+    )
 
     llm = get_llm()
     prompt = (
@@ -41,7 +48,7 @@ def writer_node(state: AgentState) -> dict[str, Any]:
     today_str = datetime.now(UTC).date().isoformat()
 
     report = f"""# 📊 Strategic Intelligence Briefing: {task.title()}
-**Generated:** {today_str} | **Engine:** LangGraph Multi-Agent Swarm | **Quality Score:** {critique.get('score', 92)}/100 (Revisions: {revisions})
+**Generated:** {today_str} | **Engine:** LangGraph Multi-Agent Swarm | **Quality Score:** {critique.get("score", 92)}/100 (Revisions: {revisions})
 
 ---
 
@@ -63,10 +70,10 @@ def writer_node(state: AgentState) -> dict[str, Any]:
 ---
 
 ## 4. Quality & Factual Verification (Critic Agent)
-- **Composite Rigor Score:** `{critique.get('score', 92)} / 100`
-- **Verification Status:** `{'PASSED' if critique.get('passed', True) else 'FLAGGED'}`
-- **Strengths:** {', '.join(critique.get('strengths', ['Multi-source triangulation']))}
-- **Quality Feedback:** {critique.get('recommendation', 'Verified against standards.')}
+- **Composite Rigor Score:** `{critique.get("score", 92)} / 100`
+- **Verification Status:** `{"PASSED" if critique.get("passed", True) else "FLAGGED"}`
+- **Strengths:** {", ".join(critique.get("strengths", ["Multi-source triangulation"]))}
+- **Quality Feedback:** {critique.get("recommendation", "Verified against standards.")}
 
 ---
 
@@ -80,5 +87,9 @@ def writer_node(state: AgentState) -> dict[str, Any]:
     return {
         "final_report": report,
         "next_agent": "end",
-        "messages": [AIMessage(content="[ExecutiveWriter] Final executive briefing successfully generated.")]
+        "messages": [
+            AIMessage(
+                content="[ExecutiveWriter] Final executive briefing successfully generated."
+            )
+        ],
     }

@@ -86,7 +86,9 @@ def test_shared_store_memory():
 
     store = get_shared_store()
     assert store is not None
-    store.put(("knowledge", "test_domain"), "insight_1", {"key": "agentic_roi", "val": "+37%"})
+    store.put(
+        ("knowledge", "test_domain"), "insight_1", {"key": "agentic_roi", "val": "+37%"}
+    )
     recalled = recall_prior_knowledge(store, "agentic_roi")
     assert isinstance(recalled, list)
 
@@ -143,7 +145,9 @@ def test_executive_html_generation():
     from langgraph_multi_agent_system.export_report import generate_executive_html
 
     sample_md = "# Title\n\n## Summary\nAutonomous swarms excel.\n\n| KPI | Value |\n|---|---|\n| Gain | 42% |"
-    html_output = generate_executive_html(sample_md, title="Test Report", quality_score=98)
+    html_output = generate_executive_html(
+        sample_md, title="Test Report", quality_score=98
+    )
     assert "<!DOCTYPE html>" in html_output
     assert "NEXUS MULTI-AGENT SWARM" in html_output
     assert "42%" in html_output
@@ -155,5 +159,7 @@ def test_pydantic_schemas_validation():
     metric = MetricItem(metric="Latency Reduction", value="38%", type="performance")
     assert metric.metric == "Latency Reduction"
 
-    critique = CriticVerdict(score=95, passed=True, verified=True, recommendation="Approved")
+    critique = CriticVerdict(
+        score=95, passed=True, verified=True, recommendation="Approved"
+    )
     assert critique.score == 95

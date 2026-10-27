@@ -38,7 +38,12 @@ def print_banner():
 def interactive_configure():
     """Interactive wizard to configure LangSmith and LLM keys in .env."""
     print_banner()
-    console.print(Panel("[bold green]Nexus Swarm Configuration Wizard[/bold green]\nConfigure your LangSmith and LLM API keys.", border_style="cyan"))
+    console.print(
+        Panel(
+            "[bold green]Nexus Swarm Configuration Wizard[/bold green]\nConfigure your LangSmith and LLM API keys.",
+            border_style="cyan",
+        )
+    )
 
     env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
     if not os.path.exists(env_path):
@@ -47,12 +52,17 @@ def interactive_configure():
 
     current_smith_key = os.getenv("LANGCHAIN_API_KEY", "")
     smith_prompt = "LangSmith API Key (starts with lsv2_pt_)"
-    smith_key = Prompt.ask(smith_prompt, default=current_smith_key or None, password=True)
+    smith_key = Prompt.ask(
+        smith_prompt, default=current_smith_key or None, password=True
+    )
     if smith_key:
         endpoint = "https://eu.api.smith.langchain.com"
         try:
             from langsmith import Client
-            c = Client(api_url="https://api.smith.langchain.com", api_key=smith_key.strip())
+
+            c = Client(
+                api_url="https://api.smith.langchain.com", api_key=smith_key.strip()
+            )
             c.list_projects(limit=1)
             endpoint = "https://api.smith.langchain.com"
         except Exception:  # noqa: BLE001, S110
@@ -61,16 +71,31 @@ def interactive_configure():
         set_key(env_path, "LANGCHAIN_TRACING_V2", "true")
         set_key(env_path, "LANGCHAIN_ENDPOINT", endpoint)
         set_key(env_path, "LANGCHAIN_API_KEY", smith_key.strip())
-        set_key(env_path, "LANGCHAIN_PROJECT", os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system"))
-        console.print(f"[green]✓ LangSmith tracing credentials saved to .env (Endpoint: {endpoint})[/green]")
+        set_key(
+            env_path,
+            "LANGCHAIN_PROJECT",
+            os.getenv("LANGCHAIN_PROJECT", "nexus-multi-agent-system"),
+        )
+        console.print(
+            f"[green]✓ LangSmith tracing credentials saved to .env (Endpoint: {endpoint})[/green]"
+        )
 
     current_openai = os.getenv("OPENAI_API_KEY", "")
-    openai_key = Prompt.ask("OpenAI API Key (optional, leave blank for offline demo mode)", default=current_openai or None, password=True)
+    openai_key = Prompt.ask(
+        "OpenAI API Key (optional, leave blank for offline demo mode)",
+        default=current_openai or None,
+        password=True,
+    )
     if openai_key:
         set_key(env_path, "OPENAI_API_KEY", openai_key.strip())
         console.print("[green]✓ OpenAI API key saved to .env[/green]")
 
-    console.print(Panel(f"[bold green]Configuration successfully updated![/bold green]\nSaved in: {env_path}", border_style="green"))
+    console.print(
+        Panel(
+            f"[bold green]Configuration successfully updated![/bold green]\nSaved in: {env_path}",
+            border_style="green",
+        )
+    )
 
 
 def run_pipeline(
@@ -145,29 +170,61 @@ def run_pipeline(
                         if node_name == "critic"
                         else "cyan"
                     )
-                    console.print(f"[{color}]● [{node_name.upper()}][/{color}] {last_msg}")
+                    console.print(
+                        f"[{color}]● [{node_name.upper()}][/{color}] {last_msg}"
+                    )
 
     # Read complete cumulative checkpoint state
     full_state = app.get_state(config).values
 
     # Check if human approval is pending
     if human_approval and full_state.get("next_agent") == "human_gate":
-        console.print(Panel("[bold yellow]Human-in-the-Loop Gate Triggered[/bold yellow]\nReview agent findings and approve final report synthesis.", border_style="yellow"))
-        approved = Prompt.ask("Approve executive report generation? (y/n)", choices=["y", "n"], default="y") == "y"
-        
+        console.print(
+            Panel(
+                "[bold yellow]Human-in-the-Loop Gate Triggered[/bold yellow]\n"
+                "Review agent findings and approve final report synthesis.\n"
+                "[dim]Dispatched run to LangSmith Annotation Queue for audit.[/dim]",
+                border_style="yellow",
+            )
+        )
+        from langgraph_multi_agent_system.langsmith_utils import (
+            push_to_annotation_queue,
+        )
+
+        push_to_annotation_queue(thread_id)
+
+        approved = (
+            Prompt.ask(
+                "Approve executive report generation? (y/n)",
+                choices=["y", "n"],
+                default="y",
+            )
+            == "y"
+        )
+
         # Resume graph execution with operator decision
-        app.update_state(config, {"human_approved": approved, "next_agent": "writer" if approved else "researcher"})
+        app.update_state(
+            config,
+            {
+                "human_approved": approved,
+                "next_agent": "writer" if approved else "researcher",
+            },
+        )
         for output in app.stream(None, config=config):
             for node_name, state_update in output.items():
                 msgs = state_update.get("messages", [])
                 if msgs:
-                    console.print(f"[cyan]● [{node_name.upper()}][/cyan] {msgs[-1].content}")
+                    console.print(
+                        f"[cyan]● [{node_name.upper()}][/cyan] {msgs[-1].content}"
+                    )
         full_state = app.get_state(config).values
 
     # Display quantitative table
     metrics = full_state.get("quantitative_data", [])
     if metrics:
-        table = Table(title="📊 Quantitative Intelligence Scorecard", border_style="cyan")
+        table = Table(
+            title="📊 Quantitative Intelligence Scorecard", border_style="cyan"
+        )
         table.add_column("Indicator / Benchmark", style="bold white")
         table.add_column("Observed Value", style="bold green")
         table.add_column("Category", style="dim")
@@ -191,38 +248,95 @@ def run_pipeline(
                 from langgraph_multi_agent_system.export_report import (
                     save_executive_html_file,
                 )
-                save_executive_html_file(report, output_file, quality_score=critique_score)
-                console.print(f"[green]✓ Styled Executive HTML Report saved to: {output_file}[/green]")
+
+                save_executive_html_file(
+                    report, output_file, quality_score=critique_score
+                )
+                console.print(
+                    f"[green]✓ Styled Executive HTML Report saved to: {output_file}[/green]"
+                )
             else:
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(report)
-                console.print(f"[green]✓ Markdown Report saved to: {output_file}[/green]")
+                console.print(
+                    f"[green]✓ Markdown Report saved to: {output_file}[/green]"
+                )
 
         # Push automated feedback to LangSmith
         from langgraph_multi_agent_system.langsmith_utils import log_critic_feedback
+
         log_critic_feedback(thread_id, critique_score)
     else:
         console.print("[red]Execution completed without generating final report.[/red]")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run Nexus LangGraph Multi-Agent Swarm")
+    parser = argparse.ArgumentParser(
+        description="Run Nexus LangGraph Multi-Agent Swarm"
+    )
     parser.add_argument(
         "task",
         nargs="?",
         default="Analyze LangChain & LangGraph enterprise multi-agent adoption in 2026",
         help="Strategic research question or task",
     )
-    parser.add_argument("--thread-id", type=str, default=None, help="LangGraph checkpoint thread ID")
-    parser.add_argument("--human-approval", action="store_true", help="Enable human-in-the-loop gate")
-    parser.add_argument("--provider", type=str, choices=["openai", "anthropic", "google", "mock"], help="LLM model provider")
-    parser.add_argument("--output", "-o", type=str, help="Save final markdown report to file")
-    parser.add_argument("--configure", action="store_true", help="Launch interactive configuration wizard for LangSmith and API keys")
-    parser.add_argument("--list-threads", action="store_true", help="List saved checkpoint thread sessions from SQLite store")
-    parser.add_argument("--time-travel", type=str, metavar="THREAD_ID", help="Inspect chronological checkpoint history for a thread")
-    parser.add_argument("--memory-search", type=str, metavar="QUERY", help="Search cross-thread long-term BaseStore memory")
-    parser.add_argument("--sync-dataset", action="store_true", help="Sync benchmark test suite to LangSmith 'Datasets & Experiments' tab")
-    parser.add_argument("--evals", action="store_true", help="Run automated LangSmith benchmark evaluation suite")
+    parser.add_argument(
+        "--thread-id", type=str, default=None, help="LangGraph checkpoint thread ID"
+    )
+    parser.add_argument(
+        "--human-approval", action="store_true", help="Enable human-in-the-loop gate"
+    )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        choices=["openai", "anthropic", "google", "mock"],
+        help="LLM model provider",
+    )
+    parser.add_argument(
+        "--output", "-o", type=str, help="Save final markdown report to file"
+    )
+    parser.add_argument(
+        "--configure",
+        action="store_true",
+        help="Launch interactive configuration wizard for LangSmith and API keys",
+    )
+    parser.add_argument(
+        "--list-threads",
+        action="store_true",
+        help="List saved checkpoint thread sessions from SQLite store",
+    )
+    parser.add_argument(
+        "--time-travel",
+        type=str,
+        metavar="THREAD_ID",
+        help="Inspect chronological checkpoint history for a thread",
+    )
+    parser.add_argument(
+        "--memory-search",
+        type=str,
+        metavar="QUERY",
+        help="Search cross-thread long-term BaseStore memory",
+    )
+    parser.add_argument(
+        "--sync-dataset",
+        action="store_true",
+        help="Sync benchmark test suite to LangSmith 'Datasets & Experiments' tab",
+    )
+    parser.add_argument(
+        "--sync-langsmith",
+        action="store_true",
+        help="One-click sync of all LangSmith assets (datasets, experiments, prompts, annotation queues)",
+    )
+    parser.add_argument(
+        "--push-prompts",
+        action="store_true",
+        help="Push agent system prompts to LangSmith Prompts hub",
+    )
+    parser.add_argument(
+        "--evals",
+        action="store_true",
+        help="Run automated LangSmith benchmark evaluation suite",
+    )
 
     args = parser.parse_args()
 
@@ -235,12 +349,18 @@ def main():
             format_history_table,
             get_checkpoint_history,
         )
+
         app = create_graph()
         history = get_checkpoint_history(app, args.time_travel)
         if not history:
-            console.print(f"[yellow]No checkpoint snapshots found for thread '{args.time_travel}'.[/yellow]")
+            console.print(
+                f"[yellow]No checkpoint snapshots found for thread '{args.time_travel}'.[/yellow]"
+            )
         else:
-            table = Table(title=f"⏳ Time-Travel History: Thread '{args.time_travel}'", border_style="cyan")
+            table = Table(
+                title=f"⏳ Time-Travel History: Thread '{args.time_travel}'",
+                border_style="cyan",
+            )
             table.add_column("Checkpoint ID", style="bold green")
             table.add_column("Next Node(s)", style="bold yellow")
             table.add_column("Target Agent", style="cyan")
@@ -255,20 +375,32 @@ def main():
             get_shared_store,
             recall_prior_knowledge,
         )
+
         store = get_shared_store()
         recalled = recall_prior_knowledge(store, args.memory_search)
         if not recalled:
-            console.print(f"[yellow]No memories found matching '{args.memory_search}'.[/yellow]")
+            console.print(
+                f"[yellow]No memories found matching '{args.memory_search}'.[/yellow]"
+            )
         else:
-            console.print(Panel(f"[bold cyan]Cross-Thread Memories for '{args.memory_search}':[/bold cyan]\n{recalled}", border_style="cyan"))
+            console.print(
+                Panel(
+                    f"[bold cyan]Cross-Thread Memories for '{args.memory_search}':[/bold cyan]\n{recalled}",
+                    border_style="cyan",
+                )
+            )
         return
 
     if args.list_threads:
         threads = list_saved_threads()
         if not threads:
-            console.print("[yellow]No saved checkpoint threads found in SQLite database.[/yellow]")
+            console.print(
+                "[yellow]No saved checkpoint threads found in SQLite database.[/yellow]"
+            )
         else:
-            table = Table(title="📜 Saved LangGraph Checkpoint Threads", border_style="cyan")
+            table = Table(
+                title="📜 Saved LangGraph Checkpoint Threads", border_style="cyan"
+            )
             table.add_column("Thread ID", style="bold green")
             table.add_column("Namespace", style="dim")
             for t in threads:
@@ -280,21 +412,71 @@ def main():
         from langgraph_multi_agent_system.langsmith_utils import (
             sync_langsmith_benchmark_dataset,
         )
+
         ds_id = sync_langsmith_benchmark_dataset()
         if ds_id:
-            console.print(f"[green]✓ Successfully synced benchmark dataset to LangSmith (ID: {ds_id})[/green]")
+            console.print(
+                f"[green]✓ Successfully synced benchmark dataset to LangSmith (ID: {ds_id})[/green]"
+            )
             console.print("[dim]View in LangSmith -> Datasets & Experiments[/dim]")
         else:
-            console.print("[yellow]Could not sync dataset. Please check LANGCHAIN_API_KEY in .env.[/yellow]")
+            console.print(
+                "[yellow]Could not sync dataset. Please check LANGCHAIN_API_KEY in .env.[/yellow]"
+            )
+        return
+
+    if args.push_prompts:
+        from langgraph_multi_agent_system.langsmith_utils import (
+            push_all_prompts_to_hub,
+        )
+
+        console.print(
+            "[cyan]Publishing agent prompts to LangSmith Prompts hub...[/cyan]"
+        )
+        prompts = push_all_prompts_to_hub()
+        for name, url in prompts.items():
+            console.print(f"[green]✓ {name}[/green] ➔ [dim]{url}[/dim]")
+        return
+
+    if args.sync_langsmith:
+        from langgraph_multi_agent_system.langsmith_utils import (
+            sync_all_langsmith_assets,
+        )
+
+        console.print(
+            Panel(
+                "[bold cyan]Syncing Nexus Swarm Assets with LangSmith[/bold cyan]\n"
+                "• Benchmark Datasets\n"
+                "• Evaluation Experiments & Scorers\n"
+                "• Human-in-the-Loop Annotation Queue\n"
+                "• Managed Agent Prompt Templates",
+                border_style="cyan",
+            )
+        )
+        res = sync_all_langsmith_assets()
+        console.print(f"[green]✓ Dataset ID:[/green] {res.get('dataset_id')}")
+        console.print(
+            f"[green]✓ Annotation Queue ID:[/green] {res.get('annotation_queue_id')}"
+        )
+        console.print(
+            f"[green]✓ Prompts Published:[/green] {', '.join(res.get('prompts_published', []))}"
+        )
+        console.print(f"[green]✓ Experiment Run:[/green] {res.get('experiment_name')}")
+        console.print(
+            "[bold green]All LangSmith assets synchronized! Check your LangSmith sidebar.[/bold green]"
+        )
         return
 
     if args.evals:
         from langgraph_multi_agent_system.evals.run_evals import run_benchmark_evals
+
         run_benchmark_evals()
         return
 
     print_banner()
-    run_pipeline(args.task, args.thread_id, args.human_approval, args.provider, args.output)
+    run_pipeline(
+        args.task, args.thread_id, args.human_approval, args.provider, args.output
+    )
 
 
 if __name__ == "__main__":

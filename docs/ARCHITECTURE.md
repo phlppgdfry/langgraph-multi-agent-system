@@ -47,20 +47,22 @@ The graph communicates through a typed dictionary (`AgentState`) that maintains 
 
 ```python
 class AgentState(TypedDict):
-    task: str                                           # Primary objective
-    messages: Annotated[list[BaseMessage], add_messages] # Cumulative conversation trace
-    plan: list[str]                                     # Phased execution steps
-    current_step: int                                   # Execution pointer
-    research_notes: list[dict[str, Any]]                # Sourced intelligence & URLs
-    quantitative_data: list[dict[str, Any]]             # Benchmarks, KPIs, and metrics
-    critique: dict[str, Any]                            # Reflection score (0-100) & feedback
-    revision_count: int                                 # Active revision iterations
-    max_revisions: int                                  # Maximum self-correction ceiling
-    next_agent: str                                     # Target router node
-    requires_human_approval: bool                       # HITL governance trigger
-    human_approved: Optional[bool]                      # Operator decision
-    final_report: Optional[str]                         # Generated markdown briefing
-    metadata: dict[str, Any]                            # Thread, model, and trace IDs
+    task: str  # Primary objective
+    messages: Annotated[
+        list[BaseMessage], add_messages
+    ]  # Cumulative conversation trace
+    plan: list[str]  # Phased execution steps
+    current_step: int  # Execution pointer
+    research_notes: list[dict[str, Any]]  # Sourced intelligence & URLs
+    quantitative_data: list[dict[str, Any]]  # Benchmarks, KPIs, and metrics
+    critique: dict[str, Any]  # Reflection score (0-100) & feedback
+    revision_count: int  # Active revision iterations
+    max_revisions: int  # Maximum self-correction ceiling
+    next_agent: str  # Target router node
+    requires_human_approval: bool  # HITL governance trigger
+    human_approved: Optional[bool]  # Operator decision
+    final_report: Optional[str]  # Generated markdown briefing
+    metadata: dict[str, Any]  # Thread, model, and trace IDs
 ```
 
 ---
