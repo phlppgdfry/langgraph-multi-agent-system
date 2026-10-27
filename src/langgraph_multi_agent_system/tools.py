@@ -23,7 +23,10 @@ def search_web(query: str) -> list[dict[str, str]]:
         A list of results containing title, snippet, and source url.
     """
     try:
-        from duckduckgo_search import DDGS
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            from duckduckgo_search import DDGS
 
         with DDGS() as ddgs:
             raw_results = list(ddgs.text(query, max_results=4))
