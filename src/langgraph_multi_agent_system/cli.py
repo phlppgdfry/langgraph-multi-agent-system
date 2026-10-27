@@ -177,6 +177,7 @@ def run_pipeline(
 
     # Display final report
     report = full_state.get("final_report")
+    critique_score = full_state.get("critique", {}).get("score", 96)
     if report:
         console.print(
             Panel(
@@ -186,9 +187,20 @@ def run_pipeline(
             )
         )
         if output_file:
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(report)
-            console.print(f"[green]✓ Report saved to: {output_file}[/green]")
+            if output_file.endswith(".html"):
+                from langgraph_multi_agent_system.export_report import (
+                    save_executive_html_file,
+                )
+                save_executive_html_file(report, output_file, quality_score=critique_score)
+                console.print(f"[green]✓ Styled Executive HTML Report saved to: {output_file}[/green]")
+            else:
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(report)
+                console.print(f"[green]✓ Markdown Report saved to: {output_file}[/green]")
+
+        # Push automated feedback to LangSmith
+        from langgraph_multi_agent_system.langsmith_utils import log_critic_feedback
+        log_critic_feedback(thread_id, critique_score)
     else:
         console.print("[red]Execution completed without generating final report.[/red]")
 
@@ -209,6 +221,7 @@ def main():
     parser.add_argument("--list-threads", action="store_true", help="List saved checkpoint thread sessions from SQLite store")
     parser.add_argument("--time-travel", type=str, metavar="THREAD_ID", help="Inspect chronological checkpoint history for a thread")
     parser.add_argument("--memory-search", type=str, metavar="QUERY", help="Search cross-thread long-term BaseStore memory")
+    parser.add_argument("--sync-dataset", action="store_true", help="Sync benchmark test suite to LangSmith 'Datasets & Experiments' tab")
     parser.add_argument("--evals", action="store_true", help="Run automated LangSmith benchmark evaluation suite")
 
     args = parser.parse_args()
@@ -261,6 +274,18 @@ def main():
             for t in threads:
                 table.add_row(t["thread_id"], t["namespace"])
             console.print(table)
+        return
+
+    if args.sync_dataset:
+        from langgraph_multi_agent_system.langsmith_utils import (
+            sync_langsmith_benchmark_dataset,
+        )
+        ds_id = sync_langsmith_benchmark_dataset()
+        if ds_id:
+            console.print(f"[green]✓ Successfully synced benchmark dataset to LangSmith (ID: {ds_id})[/green]")
+            console.print("[dim]View in LangSmith -> Datasets & Experiments[/dim]")
+        else:
+            console.print("[yellow]Could not sync dataset. Please check LANGCHAIN_API_KEY in .env.[/yellow]")
         return
 
     if args.evals:

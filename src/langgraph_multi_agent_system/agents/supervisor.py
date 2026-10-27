@@ -31,15 +31,25 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
         )
         _ = llm.invoke([HumanMessage(content=plan_prompt)])
         new_plan = [
-            "1. Deep factual research and source gathering",
+            "1. Deep factual research and parallel source gathering",
             "2. Quantitative metrics and benchmark analysis",
             "3. Fact-checking, consistency critique and reflection",
-            "4. Executive briefing generation"
+            "4. Executive briefing generation",
+        ]
+        subtasks = [
+            "Technical Architecture & StateGraph Patterns",
+            "Quantitative Performance & FinOps Metrics",
+            "Enterprise Risk & Governance Controls",
         ]
         return {
             "plan": new_plan,
+            "subtasks": subtasks,
             "next_agent": "researcher",
-            "messages": [AIMessage(content=f"[Supervisor] Plan initialized: {len(new_plan)} steps. Routing to Researcher.")]
+            "messages": [
+                AIMessage(
+                    content=f"[Supervisor] Plan initialized: {len(new_plan)} steps. Decomposed into {len(subtasks)} parallel research streams."
+                )
+            ],
         }
 
     # If no research done yet -> researcher

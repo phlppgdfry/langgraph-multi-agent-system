@@ -123,3 +123,37 @@ def test_time_travel_history():
     assert len(history) > 0
     table_rows = format_history_table(history)
     assert len(table_rows) == len(history)
+
+
+def test_parallel_research_coordinator():
+    from langgraph_multi_agent_system.agents.parallel_researcher import (
+        parallel_research_coordinator,
+    )
+
+    notes, summary = parallel_research_coordinator(
+        task="Test Multi-Agent Scalability",
+        subtasks=["Architecture", "FinOps Benchmarks"],
+    )
+    assert isinstance(notes, list)
+    assert len(notes) > 0
+    assert "[ParallelSwarm]" in summary
+
+
+def test_executive_html_generation():
+    from langgraph_multi_agent_system.export_report import generate_executive_html
+
+    sample_md = "# Title\n\n## Summary\nAutonomous swarms excel.\n\n| KPI | Value |\n|---|---|\n| Gain | 42% |"
+    html_output = generate_executive_html(sample_md, title="Test Report", quality_score=98)
+    assert "<!DOCTYPE html>" in html_output
+    assert "NEXUS MULTI-AGENT SWARM" in html_output
+    assert "42%" in html_output
+
+
+def test_pydantic_schemas_validation():
+    from langgraph_multi_agent_system.schemas import CriticVerdict, MetricItem
+
+    metric = MetricItem(metric="Latency Reduction", value="38%", type="performance")
+    assert metric.metric == "Latency Reduction"
+
+    critique = CriticVerdict(score=95, passed=True, verified=True, recommendation="Approved")
+    assert critique.score == 95

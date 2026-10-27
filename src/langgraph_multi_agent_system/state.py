@@ -23,4 +23,5 @@ class AgentState(TypedDict):
     requires_human_approval: bool
     human_approved: bool | None
     final_report: str | None
+    subtasks: list[str]
     metadata: dict[str, Any]
