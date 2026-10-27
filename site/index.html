@@ -552,10 +552,10 @@
   <!-- Empirical Benchmarks Section -->
   <section id="benchmarks" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-20">
     <div class="text-center max-w-3xl mx-auto mb-16">
-      <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Empirical Research</div>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">LangGraph vs Linear Agent Chains</h2>
+      <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Empirical Research & Benchmarks</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Single-Agent vs Multi-Agent Swarms</h2>
       <p class="text-slate-400 mt-4 text-base">
-        Benchmark results comparing single-turn linear prompt chains against Nexus's stateful, self-correcting agent swarm.
+        Objective benchmark results comparing 5 architectural baselines evaluated on identical enterprise research objectives.
       </p>
     </div>
 
@@ -563,42 +563,54 @@
       <table class="w-full text-left text-sm text-slate-300">
         <thead class="text-xs uppercase text-slate-400 border-b border-slate-800 font-mono">
           <tr>
-            <th class="py-4 px-4 font-semibold">Evaluation Metric</th>
-            <th class="py-4 px-4 font-semibold text-slate-400">Single-Turn Chain</th>
-            <th class="py-4 px-4 font-semibold text-sky-400">Nexus LangGraph Swarm</th>
-            <th class="py-4 px-4 font-semibold text-emerald-400">Observed Gain</th>
+            <th class="py-4 px-4 font-semibold">Architecture Baseline</th>
+            <th class="py-4 px-4 font-semibold text-slate-400">Sources Extracted</th>
+            <th class="py-4 px-4 font-semibold text-slate-400">KPIs Extracted</th>
+            <th class="py-4 px-4 font-semibold text-emerald-400">Factual Grounding</th>
+            <th class="py-4 px-4 font-semibold text-sky-400">Avg Tokens</th>
+            <th class="py-4 px-4 font-semibold text-purple-400">Observed Trade-off</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-800/60 font-sans">
+        <tbody class="divide-y divide-slate-800/60 font-sans text-xs">
           <tr>
-            <td class="py-3.5 px-4 font-medium text-white">Factual Accuracy (Critic Triangulation)</td>
-            <td class="py-3.5 px-4 text-slate-400">61.2%</td>
-            <td class="py-3.5 px-4 text-white font-semibold">94.8%</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">+33.6% Accuracy</td>
+            <td class="py-3.5 px-4 font-medium text-white">Baseline A: Single-Agent Direct</td>
+            <td class="py-3.5 px-4 text-slate-400">0.0</td>
+            <td class="py-3.5 px-4 text-slate-400">0.0</td>
+            <td class="py-3.5 px-4 text-rose-400 font-mono font-bold">20.0%</td>
+            <td class="py-3.5 px-4 text-slate-400">~31</td>
+            <td class="py-3.5 px-4 text-slate-400">Instant & cheap, but ungrounded with high hallucination risk.</td>
           </tr>
           <tr>
-            <td class="py-3.5 px-4 font-medium text-white">Research Query Latency</td>
-            <td class="py-3.5 px-4 text-slate-400">6.8s (manual synthesis)</td>
-            <td class="py-3.5 px-4 text-white font-semibold">4.2s (parallel nodes)</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">-38.2% Latency</td>
+            <td class="py-3.5 px-4 font-medium text-white">Baseline B: Single-Agent + Tools</td>
+            <td class="py-3.5 px-4 text-slate-400">2.0</td>
+            <td class="py-3.5 px-4 text-slate-400">3.3</td>
+            <td class="py-3.5 px-4 text-yellow-400 font-mono font-bold">65.0%</td>
+            <td class="py-3.5 px-4 text-slate-400">~222</td>
+            <td class="py-3.5 px-4 text-slate-400">Basic search grounding; single-pass without self-correction.</td>
           </tr>
           <tr>
-            <td class="py-3.5 px-4 font-medium text-white">Inference FinOps Efficiency</td>
-            <td class="py-3.5 px-4 text-slate-400">Monolithic Frontier Prompt</td>
-            <td class="py-3.5 px-4 text-white font-semibold">Tiered Routing (mini + frontier)</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">+37.5% Cost ROI</td>
+            <td class="py-3.5 px-4 font-medium text-white">Baseline C: Sequential Multi-Agent</td>
+            <td class="py-3.5 px-4 text-slate-400">2.0</td>
+            <td class="py-3.5 px-4 text-slate-400">3.3</td>
+            <td class="py-3.5 px-4 text-blue-400 font-mono font-bold">78.0%</td>
+            <td class="py-3.5 px-4 text-slate-400">~609</td>
+            <td class="py-3.5 px-4 text-slate-400">Role separation, but errors in research cascade to writer.</td>
           </tr>
           <tr>
-            <td class="py-3.5 px-4 font-medium text-white">Recovery from Low-Confidence Retrieval</td>
-            <td class="py-3.5 px-4 text-slate-400">0% (Silent Hallucination)</td>
-            <td class="py-3.5 px-4 text-white font-semibold">100% (Reflection Revision Cycle)</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">Resilient Self-Correction</td>
+            <td class="py-3.5 px-4 font-medium text-white">Baseline D: Parallel Map-Reduce</td>
+            <td class="py-3.5 px-4 text-slate-400">6.0</td>
+            <td class="py-3.5 px-4 text-slate-400">7.3</td>
+            <td class="py-3.5 px-4 text-sky-400 font-mono font-bold">88.0%</td>
+            <td class="py-3.5 px-4 text-slate-400">~1,475</td>
+            <td class="py-3.5 px-4 text-slate-400">3x higher source density across decomposed angles; no reflection.</td>
           </tr>
-          <tr>
-            <td class="py-3.5 px-4 font-medium text-white">Auditability & Governance Checkpoints</td>
-            <td class="py-3.5 px-4 text-slate-400">None (Black box)</td>
-            <td class="py-3.5 px-4 text-white font-semibold">Full SQLite Checkpoint & HITL</td>
-            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">ACID Checkpointing</td>
+          <tr class="bg-sky-500/5">
+            <td class="py-3.5 px-4 font-bold text-sky-400">Baseline F: Nexus Swarm (Reflection)</td>
+            <td class="py-3.5 px-4 text-white font-bold">6.0</td>
+            <td class="py-3.5 px-4 text-white font-bold">7.3</td>
+            <td class="py-3.5 px-4 text-emerald-400 font-mono font-bold">95.0%</td>
+            <td class="py-3.5 px-4 text-white font-bold">~2,694</td>
+            <td class="py-3.5 px-4 text-emerald-300 font-semibold">Highest grounding & auditability; requires ~3.5x tokens of sequential.</td>
           </tr>
         </tbody>
       </table>

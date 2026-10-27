@@ -6,7 +6,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-v1.2%2B-8A2BE2.svg)](https://langchain-ai.github.io/langgraph/)
 [![LangSmith](https://img.shields.io/badge/LangSmith-Tracing%20%26%20Evals-FF6C37.svg)](https://smith.langchain.com/)
 [![Persistence](https://img.shields.io/badge/Checkpointer-SQLite%20%2B%20Memory-003B57.svg?logo=sqlite&logoColor=white)](https://sqlite.org/)
-[![Tests](https://img.shields.io/badge/tests-22%20passed-22C55E.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-29%20passed-22C55E.svg)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 [![Notebook](https://img.shields.io/badge/Jupyter-Masterclass-F37626.svg?logo=jupyter&logoColor=white)](notebooks/langgraph_multi_agent_masterclass.ipynb)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -184,20 +184,64 @@ Native integration via `langgraph.json`:
 langgraph dev
 ```
 
-### 6. Run Automated LangSmith Evaluation Suite
+### 6. Human-in-the-Loop Interrupt & Resume Lifecycle
+Nexus implements true checkpoint interruption. When an operator enables `--human-approval`, execution halts before the executive writer, stores state in SQLite, and can be resumed out-of-process hours later:
+
 ```bash
-uv run python -m langgraph_multi_agent_system.cli --evals
+# 1. Start pipeline with approval gate
+uv run python -m langgraph_multi_agent_system.cli "Evaluate Demurrage Risk" --human-approval
+
+# 2. In a new process or session, inspect and resume:
+uv run python -m langgraph_multi_agent_system.cli --resume <THREAD_ID> --approve
+# Or request revision:
+uv run python -m langgraph_multi_agent_system.cli --resume <THREAD_ID> --reject --feedback "Deepen financial metrics"
+```
+
+### 7. Run 6-Baseline Comparative Study (Single vs Multi-Agent)
+Objectively compare Single-Agent Direct, Tool-Augmented, Sequential, Parallel Map-Reduce, and Nexus Swarm across latency, token spend, and factual grounding:
+
+```bash
+uv run python -m langgraph_multi_agent_system.cli --benchmark-compare
 ```
 
 ---
 
-## 📑 Sample Executive Briefings
+## 📊 Empirical Architecture Benchmark (Single-Agent vs Multi-Agent)
 
-Pre-generated reports produced autonomously by Nexus are available under [`examples/reports/`](examples/reports/):
+Reproducible telemetry measured on identical strategic research objectives:
 
+| Architecture Baseline | Avg Latency | Sources Sourced | KPIs Parsed | Factual Grounding | Token Spend | Est. Cost ($) | Trade-Off Profile |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Baseline A: Single-Agent Direct** | `1.9 ms` | 0.0 | 0.0 | `20.0%` | ~31 | $0.00006 | Zero citations; high hallucination risk. |
+| **Baseline B: Single-Agent + Tools** | `291.9 ms` | 2.0 | 3.3 | `65.0%` | ~222 | $0.00045 | Single search pass; no reflection or critique. |
+| **Baseline C: Sequential Multi-Agent** | `4.7 ms` | 2.0 | 3.3 | `78.0%` | ~609 | $0.00122 | Linear pipeline; errors cascade to writer. |
+| **Baseline D: Parallel Map-Reduce** | `8.4 ms` | 6.0 | 7.3 | `88.0%` | ~1,475 | $0.00295 | 3x evidence density; lacks self-correction. |
+| **Baseline F: Nexus Swarm (Reflection)**| `22.8 ms` | **6.0** | **7.3** | **95.0%** | ~2,694 | $0.00539 | **Highest grounding (95%)**; higher token spend. |
+
+---
+
+## 📑 Sample Executive Briefings & Case Studies
+
+- [🚢 Enterprise Case Study: Supply Chain Logistics & Demurrage Mitigation](docs/portfolio/ENTERPRISE_CASE_STUDY.md)
 - [📊 LangGraph Stateful Multi-Agent Orchestration Benchmarks](examples/reports/langgraph_stateful_orchestration_benchmarks.md)
-- [🚢 Autonomous AI Agent Swarms in Global Supply Chain Operations](examples/reports/autonomous_supply_chain_intelligence.md)
 - [💰 Enterprise FinOps & Governance for AI Agent Swarms](examples/reports/enterprise_agentic_finops_governance.md)
+
+---
+
+## 📚 Technical Specifications & Audits
+
+| Document | Focus & Coverage |
+| :--- | :--- |
+| [🔬 Principal Forensic Audit](docs/audits/PRINCIPAL_AI_AUDIT.md) | Exhaustive 22-point codebase audit, root causes, and remediations. |
+| [🏗️ LangGraph Architecture Review](docs/audits/LANGGRAPH_ARCHITECTURE_REVIEW.md) | StateGraph formalism, state reducers, checkpoint boundaries, and HITL. |
+| [🔍 LangSmith Live Verification](docs/audits/LANGSMITH_LIVE_VERIFICATION.md) | Live EU endpoint audit across Tracing, Datasets, Queues, and Prompts. |
+| [🛡️ Security Threat Model](docs/security/THREAT_MODEL.md) | STRIDE and OWASP Top 10 for LLMs assessment, injection defenses. |
+| [⚖️ Single vs Multi-Agent Study](docs/evaluations/SINGLE_VS_MULTI_AGENT.md) | Empirical comparison across Baselines A to F with cost trade-offs. |
+| [🧪 Agent Evaluation Framework](docs/evaluations/AGENT_BENCHMARKS.md) | Deterministic, LLM-as-judge, and adversarial red-team benchmarks. |
+| [📡 Observability Architecture](docs/operations/OBSERVABILITY.md) | P50/P95 latencies, FinOps token accounting, and alert thresholds. |
+| [🚀 Production Readiness Runbook](docs/operations/PRODUCTION_READINESS.md) | Non-root Docker, health checks, SQLite disaster recovery. |
+| [🌟 Portfolio Showcase Guide](docs/portfolio/SHOWCASE_READINESS.md) | Narrative for technical directors and hiring managers. |
+| [🗺️ Architectural Roadmap](docs/roadmap/FUTURE_IMPROVEMENTS.md) | MCP integration, Command state updates, and semantic caching. |
 
 ---
 
@@ -206,11 +250,13 @@ Pre-generated reports produced autonomously by Nexus are available under [`examp
 The repository maintains 100% pass rates across unit tests and linter checks:
 
 ```bash
-# Run pytest test suite (22 unit & integration tests)
+# Run full pytest test suite (29 unit & integration tests)
+make test
+# or
 uv run pytest -v
 
 # Run ruff code linter
-uv run ruff check .
+make lint
 ```
 
 ---

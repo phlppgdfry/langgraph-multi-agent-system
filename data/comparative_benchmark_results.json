@@ -1,0 +1,239 @@
+{
+  "runs": [
+    {
+      "baseline": "Baseline A: Single-Agent Direct",
+      "latency_ms": 5.2,
+      "word_count": 23,
+      "token_estimate": 31,
+      "sources_count": 0,
+      "metrics_count": 0,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.2,
+      "cost_estimate_usd": 6e-05,
+      "task": "Enterprise AI Agent Swarms in Global Supply Chain Operations"
+    },
+    {
+      "baseline": "Baseline B: Single-Agent + Tools",
+      "latency_ms": 864.9,
+      "word_count": 49,
+      "token_estimate": 228,
+      "sources_count": 2,
+      "metrics_count": 3,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.65,
+      "cost_estimate_usd": 0.00046,
+      "task": "Enterprise AI Agent Swarms in Global Supply Chain Operations"
+    },
+    {
+      "baseline": "Baseline C: Sequential Agents",
+      "latency_ms": 5.7,
+      "word_count": 49,
+      "token_estimate": 616,
+      "sources_count": 2,
+      "metrics_count": 3,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.78,
+      "cost_estimate_usd": 0.00123,
+      "task": "Enterprise AI Agent Swarms in Global Supply Chain Operations"
+    },
+    {
+      "baseline": "Baseline D: Parallel Map-Reduce",
+      "latency_ms": 9.5,
+      "word_count": 49,
+      "token_estimate": 1570,
+      "sources_count": 6,
+      "metrics_count": 9,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.88,
+      "cost_estimate_usd": 0.00314,
+      "task": "Enterprise AI Agent Swarms in Global Supply Chain Operations"
+    },
+    {
+      "baseline": "Baseline F: Nexus Swarm (Reflection)",
+      "latency_ms": 20.7,
+      "word_count": 538,
+      "token_estimate": 2805,
+      "sources_count": 6,
+      "metrics_count": 9,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.95,
+      "critic_score": 96,
+      "cost_estimate_usd": 0.00561,
+      "task": "Enterprise AI Agent Swarms in Global Supply Chain Operations"
+    },
+    {
+      "baseline": "Baseline A: Single-Agent Direct",
+      "latency_ms": 0.2,
+      "word_count": 23,
+      "token_estimate": 31,
+      "sources_count": 0,
+      "metrics_count": 0,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.2,
+      "cost_estimate_usd": 6e-05,
+      "task": "Analyze LangChain & LangGraph Enterprise Multi-Agent Adoption in 2026"
+    },
+    {
+      "baseline": "Baseline B: Single-Agent + Tools",
+      "latency_ms": 4.1,
+      "word_count": 49,
+      "token_estimate": 204,
+      "sources_count": 2,
+      "metrics_count": 4,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.65,
+      "cost_estimate_usd": 0.00041,
+      "task": "Analyze LangChain & LangGraph Enterprise Multi-Agent Adoption in 2026"
+    },
+    {
+      "baseline": "Baseline C: Sequential Agents",
+      "latency_ms": 3.8,
+      "word_count": 49,
+      "token_estimate": 591,
+      "sources_count": 2,
+      "metrics_count": 4,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.78,
+      "cost_estimate_usd": 0.00118,
+      "task": "Analyze LangChain & LangGraph Enterprise Multi-Agent Adoption in 2026"
+    },
+    {
+      "baseline": "Baseline D: Parallel Map-Reduce",
+      "latency_ms": 8.1,
+      "word_count": 49,
+      "token_estimate": 1254,
+      "sources_count": 6,
+      "metrics_count": 4,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.88,
+      "cost_estimate_usd": 0.00251,
+      "task": "Analyze LangChain & LangGraph Enterprise Multi-Agent Adoption in 2026"
+    },
+    {
+      "baseline": "Baseline F: Nexus Swarm (Reflection)",
+      "latency_ms": 23.1,
+      "word_count": 391,
+      "token_estimate": 2484,
+      "sources_count": 6,
+      "metrics_count": 4,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.95,
+      "critic_score": 96,
+      "cost_estimate_usd": 0.00497,
+      "task": "Analyze LangChain & LangGraph Enterprise Multi-Agent Adoption in 2026"
+    },
+    {
+      "baseline": "Baseline A: Single-Agent Direct",
+      "latency_ms": 0.2,
+      "word_count": 23,
+      "token_estimate": 31,
+      "sources_count": 0,
+      "metrics_count": 0,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.2,
+      "cost_estimate_usd": 6e-05,
+      "task": "Enterprise FinOps: Token Budgeting and Cost Optimization for Autonomous Agents"
+    },
+    {
+      "baseline": "Baseline B: Single-Agent + Tools",
+      "latency_ms": 6.6,
+      "word_count": 49,
+      "token_estimate": 234,
+      "sources_count": 2,
+      "metrics_count": 3,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.65,
+      "cost_estimate_usd": 0.00047,
+      "task": "Enterprise FinOps: Token Budgeting and Cost Optimization for Autonomous Agents"
+    },
+    {
+      "baseline": "Baseline C: Sequential Agents",
+      "latency_ms": 4.6,
+      "word_count": 49,
+      "token_estimate": 621,
+      "sources_count": 2,
+      "metrics_count": 3,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.78,
+      "cost_estimate_usd": 0.00124,
+      "task": "Enterprise FinOps: Token Budgeting and Cost Optimization for Autonomous Agents"
+    },
+    {
+      "baseline": "Baseline D: Parallel Map-Reduce",
+      "latency_ms": 7.7,
+      "word_count": 49,
+      "token_estimate": 1602,
+      "sources_count": 6,
+      "metrics_count": 9,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.88,
+      "cost_estimate_usd": 0.0032,
+      "task": "Enterprise FinOps: Token Budgeting and Cost Optimization for Autonomous Agents"
+    },
+    {
+      "baseline": "Baseline F: Nexus Swarm (Reflection)",
+      "latency_ms": 24.7,
+      "word_count": 530,
+      "token_estimate": 2795,
+      "sources_count": 6,
+      "metrics_count": 9,
+      "reflection_cycles": 0,
+      "grounding_ratio": 0.95,
+      "critic_score": 96,
+      "cost_estimate_usd": 0.00559,
+      "task": "Enterprise FinOps: Token Budgeting and Cost Optimization for Autonomous Agents"
+    }
+  ],
+  "summary": [
+    {
+      "baseline": "Baseline A: Single-Agent Direct",
+      "avg_latency_ms": 1.9,
+      "avg_words": 23,
+      "avg_sources": 0.0,
+      "avg_metrics": 0.0,
+      "avg_grounding": 20.0,
+      "avg_tokens": 31,
+      "avg_cost_usd": 6e-05
+    },
+    {
+      "baseline": "Baseline B: Single-Agent + Tools",
+      "avg_latency_ms": 291.9,
+      "avg_words": 49,
+      "avg_sources": 2.0,
+      "avg_metrics": 3.3,
+      "avg_grounding": 65.0,
+      "avg_tokens": 222,
+      "avg_cost_usd": 0.00045
+    },
+    {
+      "baseline": "Baseline C: Sequential Agents",
+      "avg_latency_ms": 4.7,
+      "avg_words": 49,
+      "avg_sources": 2.0,
+      "avg_metrics": 3.3,
+      "avg_grounding": 78.0,
+      "avg_tokens": 609,
+      "avg_cost_usd": 0.00122
+    },
+    {
+      "baseline": "Baseline D: Parallel Map-Reduce",
+      "avg_latency_ms": 8.4,
+      "avg_words": 49,
+      "avg_sources": 6.0,
+      "avg_metrics": 7.3,
+      "avg_grounding": 88.0,
+      "avg_tokens": 1475,
+      "avg_cost_usd": 0.00295
+    },
+    {
+      "baseline": "Baseline F: Nexus Swarm (Reflection)",
+      "avg_latency_ms": 22.8,
+      "avg_words": 486,
+      "avg_sources": 6.0,
+      "avg_metrics": 7.3,
+      "avg_grounding": 95.0,
+      "avg_tokens": 2694,
+      "avg_cost_usd": 0.00539
+    }
+  ]
+}

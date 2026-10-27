@@ -44,6 +44,7 @@ htmlcov/
 .langgraph/
 data/*.db
 data/*.html
+data/swarm_memory.json
 briefing*.md
 
 # IDE & OS

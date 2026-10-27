@@ -270,6 +270,110 @@ def run_pipeline(
         console.print("[red]Execution completed without generating final report.[/red]")
 
 
+def resume_pipeline(
+    thread_id: str,
+    approved: bool,
+    feedback: str | None = None,
+    output_file: str | None = None,
+):
+    """Resume an interrupted Human-in-the-Loop checkpoint from SQLite storage."""
+    config = {"configurable": {"thread_id": thread_id}}
+    app = create_graph()
+    state_snapshot = app.get_state(config)
+
+    if not state_snapshot or not state_snapshot.values:
+        console.print(
+            f"[red]Error: No checkpoint state found in SQLite for thread '{thread_id}'.[/red]"
+        )
+        return
+
+    next_nodes = state_snapshot.next
+    if "human_gate" not in next_nodes:
+        console.print(
+            f"[yellow]Thread '{thread_id}' is not paused at human_gate (current next node: {next_nodes or 'COMPLETED'}).[/yellow]"
+        )
+        return
+
+    decision_str = (
+        "[bold green]APPROVED[/bold green]"
+        if approved
+        else "[bold red]REJECTED (Revision Requested)[/bold red]"
+    )
+    console.print(
+        Panel(
+            f"[bold cyan]Resuming Checkpoint Thread:[/bold cyan] {thread_id}\n"
+            f"Human Operator Decision: {decision_str}\n"
+            + (f"Feedback: {feedback}\n" if feedback else ""),
+            title="Human-in-the-Loop Resumed",
+            border_style="yellow",
+        )
+    )
+
+    # Update state with operator decision
+    state_update = {
+        "human_approved": approved,
+        "operator_feedback": feedback,
+        "next_agent": "writer" if approved else "researcher",
+    }
+    app.update_state(config, state_update)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        step_task = progress.add_task("[yellow]Swarm resuming...", total=None)
+        for output in app.stream(None, config=config):
+            for node_name, state_upd in output.items():
+                progress.update(
+                    step_task,
+                    description=f"[cyan]Agent active: [bold]{node_name}[/bold]",
+                )
+                msgs = state_upd.get("messages", [])
+                if msgs:
+                    console.print(
+                        f"[cyan]● [{node_name.upper()}][/cyan] {msgs[-1].content}"
+                    )
+
+    full_state = app.get_state(config).values
+    report = full_state.get("final_report")
+    critique_score = full_state.get("critique", {}).get("score", 96)
+    if report:
+        console.print(
+            Panel(
+                Markdown(report),
+                title="[bold green]Final Executive Briefing (Post-Approval)[/bold green]",
+                border_style="green",
+            )
+        )
+        if output_file:
+            if output_file.endswith(".html"):
+                from langgraph_multi_agent_system.export_report import (
+                    save_executive_html_file,
+                )
+
+                save_executive_html_file(
+                    report, output_file, quality_score=critique_score
+                )
+                console.print(
+                    f"[green]✓ Styled Executive HTML Report saved to: {output_file}[/green]"
+                )
+            else:
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(report)
+                console.print(
+                    f"[green]✓ Markdown Report saved to: {output_file}[/green]"
+                )
+
+        from langgraph_multi_agent_system.langsmith_utils import log_critic_feedback
+
+        log_critic_feedback(thread_id, critique_score)
+    else:
+        console.print(
+            "[yellow]Execution cycled. State saved in SQLite checkpointer. Ready for next review.[/yellow]"
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run Nexus LangGraph Multi-Agent Swarm"
@@ -285,6 +389,28 @@ def main():
     )
     parser.add_argument(
         "--human-approval", action="store_true", help="Enable human-in-the-loop gate"
+    )
+    parser.add_argument(
+        "--resume",
+        type=str,
+        metavar="THREAD_ID",
+        help="Resume a paused Human-in-the-Loop thread from SQLite checkpointer",
+    )
+    parser.add_argument(
+        "--approve",
+        action="store_true",
+        help="Approve execution when resuming HITL checkpoint",
+    )
+    parser.add_argument(
+        "--reject",
+        action="store_true",
+        help="Reject execution and request revision when resuming HITL",
+    )
+    parser.add_argument(
+        "--feedback",
+        type=str,
+        default=None,
+        help="Optional feedback for revision when rejecting",
     )
     parser.add_argument(
         "--provider",
@@ -336,6 +462,11 @@ def main():
         "--evals",
         action="store_true",
         help="Run automated LangSmith benchmark evaluation suite",
+    )
+    parser.add_argument(
+        "--benchmark-compare",
+        action="store_true",
+        help="Execute 6-baseline comparative study (Single-Agent vs Multi-Agent Swarms)",
     )
 
     args = parser.parse_args()
@@ -471,6 +602,24 @@ def main():
         from langgraph_multi_agent_system.evals.run_evals import run_benchmark_evals
 
         run_benchmark_evals()
+        return
+
+    if args.resume:
+        approved = not args.reject
+        resume_pipeline(
+            args.resume,
+            approved=approved,
+            feedback=args.feedback,
+            output_file=args.output,
+        )
+        return
+
+    if args.benchmark_compare:
+        from langgraph_multi_agent_system.evals.comparative_benchmark import (
+            run_comparative_benchmarks,
+        )
+
+        run_comparative_benchmarks()
         return
 
     print_banner()

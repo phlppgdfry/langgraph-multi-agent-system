@@ -22,6 +22,7 @@ class AgentState(TypedDict):
     next_agent: str
     requires_human_approval: bool
     human_approved: bool | None
+    operator_feedback: str | None
     final_report: str | None
     subtasks: list[str]
     metadata: dict[str, Any]

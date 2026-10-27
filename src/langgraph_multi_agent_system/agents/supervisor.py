@@ -8,6 +8,38 @@ from langgraph_multi_agent_system.state import AgentState
 from langgraph_multi_agent_system.tools import get_llm
 
 
+def _decompose_objective_into_subtasks(task: str) -> list[str]:
+    """Dynamically determine parallel research subtasks tailored to the strategic objective."""
+    t_lower = task.lower()
+    if any(k in t_lower for k in ["supply chain", "logistics", "freight", "container"]):
+        return [
+            "Port Congestion, Container Dwell Time & Demurrage Mitigation",
+            "Autonomous Route Optimization & Carrier SLA Performance",
+            "Customs Clearance, Regulatory Compliance & Border Risk",
+        ]
+    elif any(k in t_lower for k in ["finops", "token", "cost", "budget"]):
+        return [
+            "Token Budget Allocation & Multi-Tier Inference Caching",
+            "Model Cost-to-Performance Benchmarks & Provider Routing",
+            "Autonomous Spend Ceilings & Financial Governance",
+        ]
+    elif any(k in t_lower for k in ["langgraph", "langchain", "multi-agent", "swarm"]):
+        return [
+            "StateGraph Architecture, Checkpoint Persistence & HITL",
+            "Multi-Agent Synthesis Latency & Token Economics",
+            "Enterprise Security, Red-Teaming & Production Guardrails",
+        ]
+    else:
+        # Dynamic decomposition for generic strategic questions
+        words = [w for w in task.split() if len(w) > 3][:4]
+        topic = " ".join(words) or task
+        return [
+            f"{topic}: Technical Architecture & Operational Frameworks",
+            f"{topic}: Quantitative ROI, Latency & Cost Indicators",
+            f"{topic}: Compliance, Risk Matrix & Governance Verification",
+        ]
+
+
 def supervisor_node(state: AgentState) -> dict[str, Any]:
     """Evaluates current progress and decides the next agent to invoke."""
     task = state.get("task", "Analyze technology trends")
@@ -16,11 +48,12 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
     quantitative_data = state.get("quantitative_data", [])
     critique = state.get("critique", {})
     revision_count = state.get("revision_count", 0)
+    subtasks = state.get("subtasks", [])
 
     llm = get_llm()
 
-    # Formulate initial plan if empty
-    if not plan:
+    # Formulate initial plan and tailored subtasks if empty
+    if not plan or not subtasks:
         plan_prompt = (
             f"You are the Supervisor of an elite multi-agent system. Task: '{task}'.\n"
             "Break this task into 4 strategic phases:\n"
@@ -36,18 +69,18 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
             "3. Fact-checking, consistency critique and reflection",
             "4. Executive briefing generation",
         ]
-        subtasks = [
-            "Technical Architecture & StateGraph Patterns",
-            "Quantitative Performance & FinOps Metrics",
-            "Enterprise Risk & Governance Controls",
-        ]
+        dynamic_subtasks = _decompose_objective_into_subtasks(task)
         return {
             "plan": new_plan,
-            "subtasks": subtasks,
+            "subtasks": dynamic_subtasks,
             "next_agent": "researcher",
             "messages": [
                 AIMessage(
-                    content=f"[Supervisor] Plan initialized: {len(new_plan)} steps. Decomposed into {len(subtasks)} parallel research streams."
+                    content=(
+                        f"[Supervisor] Plan initialized: {len(new_plan)} phases.\n"
+                        f"Decomposed objective into {len(dynamic_subtasks)} tailored workstreams:\n"
+                        + "\n".join(f"  • {st}" for st in dynamic_subtasks)
+                    )
                 )
             ],
         }
@@ -58,7 +91,7 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
             "next_agent": "researcher",
             "messages": [
                 AIMessage(
-                    content="[Supervisor] Routing to Researcher for primary data collection."
+                    content="[Supervisor] Routing to Researcher for parallel data collection."
                 )
             ],
         }
@@ -108,6 +141,20 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
             "messages": [
                 AIMessage(
                     content="[Supervisor] Quality checks passed. Routing to Human Gatekeeper for executive review."
+                )
+            ],
+        }
+
+    # If human rejected and requested revision
+    if approved is False and revision_count < max_revisions + 1:
+        feedback = state.get("operator_feedback", "Operator requested revision.")
+        return {
+            "next_agent": "researcher",
+            "revision_count": revision_count + 1,
+            "human_approved": None,  # Reset for next human review cycle
+            "messages": [
+                AIMessage(
+                    content=f"[Supervisor] Operator requested revisions: '{feedback}'. Routing back to Researcher."
                 )
             ],
         }
