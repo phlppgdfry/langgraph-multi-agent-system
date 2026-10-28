@@ -3,6 +3,8 @@
 import argparse
 import os
 import uuid
+from datetime import UTC
+from typing import Any
 
 from dotenv import load_dotenv, set_key
 from rich.console import Console
@@ -270,13 +272,45 @@ def run_pipeline(
         console.print("[red]Execution completed without generating final report.[/red]")
 
 
+def log_hitl_audit_event(
+    thread_id: str,
+    action: str,
+    approved: bool | None,
+    feedback: str | None,
+    status: str,
+    details: dict[str, Any] | None = None,
+    audit_file: str = "data/hitl_audit.log",
+) -> None:
+    """Append structured JSON audit trail for Human-in-the-Loop operator actions."""
+    import json
+    import os
+    from datetime import datetime
+
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(audit_file)), exist_ok=True)
+        event = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "thread_id": thread_id,
+            "action": action,
+            "approved": approved,
+            "feedback": feedback,
+            "status": status,
+            "details": details or {},
+        }
+        with open(audit_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event) + "\n")
+    except Exception:  # noqa: BLE001, S110
+        pass
+
+
 def resume_pipeline(
     thread_id: str,
     approved: bool,
     feedback: str | None = None,
     output_file: str | None = None,
-):
-    """Resume an interrupted Human-in-the-Loop checkpoint from SQLite storage."""
+    audit_file: str = "data/hitl_audit.log",
+) -> dict[str, Any]:
+    """Resume an interrupted Human-in-the-Loop checkpoint from SQLite storage with audit tracking."""
     config = {"configurable": {"thread_id": thread_id}}
     app = create_graph()
     state_snapshot = app.get_state(config)
@@ -285,14 +319,35 @@ def resume_pipeline(
         console.print(
             f"[red]Error: No checkpoint state found in SQLite for thread '{thread_id}'.[/red]"
         )
-        return
+        log_hitl_audit_event(
+            thread_id,
+            "resume_attempt",
+            approved,
+            feedback,
+            "thread_not_found",
+            audit_file=audit_file,
+        )
+        return {"status": "thread_not_found", "thread_id": thread_id}
 
     next_nodes = state_snapshot.next
     if "human_gate" not in next_nodes:
         console.print(
             f"[yellow]Thread '{thread_id}' is not paused at human_gate (current next node: {next_nodes or 'COMPLETED'}).[/yellow]"
         )
-        return
+        log_hitl_audit_event(
+            thread_id,
+            "resume_attempt",
+            approved,
+            feedback,
+            "already_completed",
+            {"next_nodes": list(next_nodes) if next_nodes else []},
+            audit_file=audit_file,
+        )
+        return {
+            "status": "already_completed",
+            "thread_id": thread_id,
+            "next_nodes": list(next_nodes) if next_nodes else [],
+        }
 
     decision_str = (
         "[bold green]APPROVED[/bold green]"
@@ -368,10 +423,38 @@ def resume_pipeline(
         from langgraph_multi_agent_system.langsmith_utils import log_critic_feedback
 
         log_critic_feedback(thread_id, critique_score)
+
+        log_hitl_audit_event(
+            thread_id,
+            "resume_completed",
+            approved,
+            feedback,
+            "success_approved",
+            {"quality_score": critique_score},
+            audit_file=audit_file,
+        )
+        return {
+            "status": "success_approved",
+            "thread_id": thread_id,
+            "report_length": len(report),
+            "score": critique_score,
+        }
     else:
         console.print(
             "[yellow]Execution cycled. State saved in SQLite checkpointer. Ready for next review.[/yellow]"
         )
+        log_hitl_audit_event(
+            thread_id,
+            "resume_cycled",
+            approved,
+            feedback,
+            "revision_cycle_active",
+            audit_file=audit_file,
+        )
+        return {
+            "status": "revision_cycle_active",
+            "thread_id": thread_id,
+        }
 
 
 def main():

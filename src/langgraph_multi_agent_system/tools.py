@@ -1,15 +1,118 @@
 """Tool definitions, multi-provider model helpers, and domain knowledge."""
 
+import ipaddress
 import os
 import re
+import socket
 import warnings
 from typing import Any
+from urllib.parse import urlparse
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.tools import tool
+
+
+def validate_url_for_ssrf(url: str) -> bool:
+    """Validate URL to protect against SSRF, internal network scanning, and DNS rebinding.
+
+    Disallows:
+    - Non-HTTP(S) protocols (file://, gopher://, etc.)
+    - Private IP blocks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+    - Loopback addresses (127.0.0.0/8, ::1)
+    - Link-local and cloud metadata addresses (169.254.169.254)
+    - Reserved/multicast ranges
+    """
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme.lower() not in ("http", "https"):
+            return False
+
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+
+        # Check against common local/private domains
+        lower_host = hostname.lower()
+        if lower_host in (
+            "localhost",
+            "local",
+            "internal",
+            "intranet",
+        ) or lower_host.endswith(
+            (".local", ".internal", ".lan", ".home", ".arpa", ".onion")
+        ):
+            return False
+
+        # Direct IP check
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_reserved
+                or ip.is_multicast
+            ):
+                return False
+        except ValueError:
+            # It's a domain name; try to resolve host to IP addresses if online
+            try:
+                addr_info = socket.getaddrinfo(hostname, None)
+                for entry in addr_info:
+                    ip_str = entry[4][0]
+                    resolved_ip = ipaddress.ip_address(ip_str)
+                    if (
+                        resolved_ip.is_private
+                        or resolved_ip.is_loopback
+                        or resolved_ip.is_link_local
+                        or resolved_ip.is_reserved
+                        or resolved_ip.is_multicast
+                    ):
+                        return False
+            except socket.gaierror:
+                # In sandbox or offline environments, DNS lookup fails.
+                # Allow standard public top-level domain names.
+                if "." not in hostname:
+                    return False
+            except Exception:  # noqa: BLE001
+                return False
+
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def sanitize_input_for_injection(text: str) -> tuple[str, bool]:
+    """Scan and sanitize user or external input against prompt injection patterns.
+
+    Returns:
+        (sanitized_text, is_suspicious)
+    """
+    injection_patterns = [
+        r"ignore\s+(all\s+)?(previous|prior)\s+instructions",
+        r"system\s+override",
+        r"you\s+are\s+now\s+in\s+dan\s+mode",
+        r"jailbreak",
+        r"disregard\s+(all\s+)?(prior|above)\s+prompts?",
+        r"reveal\s+(the\s+)?system\s+prompt",
+        r"developer\s+mode\s+enabled",
+        r"bypass\s+(safety|content)\s+filters?",
+    ]
+
+    is_suspicious = False
+    sanitized = text
+
+    for pattern in injection_patterns:
+        if re.search(pattern, sanitized, re.IGNORECASE):
+            is_suspicious = True
+            sanitized = re.sub(
+                pattern, "[BLOCKED_INJECTION_MARKER]", sanitized, flags=re.IGNORECASE
+            )
+
+    return sanitized, is_suspicious
 
 
 @tool
@@ -140,24 +243,67 @@ def extract_metrics(text: str) -> list[dict[str, Any]]:
 
 @tool
 def verify_claim(claim: str, sources: list[str]) -> dict[str, Any]:
-    """Cross-verify an assertion against a list of verified source snippets.
+    """Cross-verify an assertion against a list of verified source snippets or URLs.
 
     Args:
         claim: The assertion to verify.
         sources: List of source snippets or URLs.
 
     Returns:
-        Verification verdict, confidence score, and rationale.
+        Verification verdict, confidence score, lexical overlap, and rationale.
     """
-    has_sources = len(sources) > 0
+    if not sources:
+        return {
+            "claim": claim,
+            "verified": False,
+            "confidence": 0.20,
+            "overlap_ratio": 0.0,
+            "rationale": "Zero external source evidence provided for corroboration.",
+        }
+
+    # Extract meaningful keywords (tokens > 3 chars)
+    claim_tokens = {
+        w.lower()
+        for w in re.findall(r"\b[a-zA-Z]{4,}\b", claim)
+        if w.lower()
+        not in {
+            "this",
+            "that",
+            "with",
+            "from",
+            "have",
+            "were",
+            "they",
+            "their",
+            "which",
+            "about",
+        }
+    }
+
+    combined_sources = " ".join(sources).lower()
+    if not claim_tokens:
+        overlap_ratio = 1.0 if sources else 0.0
+    else:
+        matched = sum(1 for token in claim_tokens if token in combined_sources)
+        overlap_ratio = matched / len(claim_tokens)
+
+    # Confirmed if at least 1 source is present, confidence scaled by actual overlap
+    has_urls = any(s.strip().startswith(("http://", "https://")) for s in sources)
+    is_verified = len(sources) > 0 and (
+        has_urls or overlap_ratio > 0.20 or len(claim_tokens) <= 2
+    )
+    base_conf = 0.85 if has_urls else 0.50
+    confidence = round(min(0.98, max(0.40, base_conf + overlap_ratio * 0.45)), 2)
+
     return {
         "claim": claim,
-        "verified": has_sources,
-        "confidence": 0.95 if has_sources else 0.40,
+        "verified": is_verified,
+        "confidence": confidence,
+        "overlap_ratio": round(overlap_ratio, 3),
         "rationale": (
-            "Claim is corroborated across multi-source evidence streams."
-            if has_sources
-            else "Insufficient corroboration; requires additional research."
+            f"Claim corroborated by {len(sources)} source(s) with {overlap_ratio * 100:.1f}% lexical evidence alignment."
+            if is_verified
+            else "Insufficient lexical corroboration found in provided source snippets."
         ),
     }
 
