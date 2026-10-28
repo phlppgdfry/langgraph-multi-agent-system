@@ -6,7 +6,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-v1.2%2B-8A2BE2.svg)](https://langchain-ai.github.io/langgraph/)
 [![LangSmith](https://img.shields.io/badge/LangSmith-Tracing%20%26%20Evals-FF6C37.svg)](https://smith.langchain.com/)
 [![Persistence](https://img.shields.io/badge/Checkpointer-SQLite%20%2B%20Memory-003B57.svg?logo=sqlite&logoColor=white)](https://sqlite.org/)
-[![Tests](https://img.shields.io/badge/tests-40%20passed-22C55E.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-45%20passed-22C55E.svg)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 [![Notebook](https://img.shields.io/badge/Jupyter-Masterclass-F37626.svg?logo=jupyter&logoColor=white)](notebooks/langgraph_multi_agent_masterclass.ipynb)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -232,7 +232,7 @@ All claims in this repository are backed by 12 independent engineering audits an
 
 | Document | Focus & Coverage |
 | :--- | :--- |
-| [🔬 Final Principal AI Audit](docs/FINAL_PRINCIPAL_AI_AUDIT.md) | Independent findings register (AUD-001–012), code references, and recalculated scorecard (9.5/10). |
+| [🔬 Final Principal AI Audit](docs/FINAL_PRINCIPAL_AI_AUDIT.md) | Independent findings register (AUD-001–015), code references, and objective capability matrix. |
 | [📊 Benchmark Methodology Review](docs/BENCHMARK_METHODOLOGY_REVIEW.md) | Forensic separation of simulation vs live benchmarks and objective grounding formulations. |
 | [⚡ Real Agent Performance Evaluation](docs/REAL_AGENT_PERFORMANCE_EVALUATION.md) | Engine overhead profiling vs live LLM roundtrips and token consumption. |
 | [💾 Memory Persistence Audit](docs/MEMORY_PERSISTENCE_AUDIT.md) | Thread-safe `RLock`, atomic write protocol (`NamedTemporaryFile` + `os.replace`), and tenant isolation. |
@@ -241,7 +241,7 @@ All claims in this repository are backed by 12 independent engineering audits an
 | [🔐 Agentic Security Threat Model](docs/AGENTIC_SECURITY_THREAT_MODEL.md) | OWASP Top 10 for LLMs, SSRF private IP validation, and regex prompt injection sanitization. |
 | [🧪 Agent Evaluation Framework](docs/AGENT_EVALUATION_FRAMEWORK.md) | 4-dimensional evaluation rubric: Grounding, Quantitative Density, Structure, and FinOps. |
 | [🔄 Continuous Improvement Design](docs/CONTINUOUS_IMPROVEMENT_DESIGN.md) | Autonomous flywheel connecting flagged low scores, annotation queues, and dynamic prompt templates. |
-| [🚢 Enterprise Case Study](docs/ENTERPRISE_CASE_STUDY.md) | Real-world supply chain and FinOps implementation with 97.9% turnaround reduction. |
+| [🚢 Enterprise Reference Scenario](docs/ENTERPRISE_CASE_STUDY.md) | Parametric cost-benefit modeling and feasibility analysis for operational document logistics. |
 | [💼 Final Portfolio Readiness](docs/FINAL_PORTFOLIO_READINESS.md) | Recruiter and architectural assessment with a 5-minute live demonstration script. |
 | [⚠️ Remaining Risks & Limitations](docs/REMAINING_RISKS.md) | Transparent disclosure of technical constraints and prioritized engineering roadmap. |
 | [📡 Observability Architecture](docs/operations/OBSERVABILITY.md) | P50/P95 latencies, FinOps token accounting, and alert thresholds. |
@@ -256,7 +256,7 @@ All claims in this repository are backed by 12 independent engineering audits an
 The repository maintains 100% pass rates across unit tests and linter checks:
 
 ```bash
-# Run full pytest test suite (29 unit & integration tests)
+# Run full pytest test suite (45 unit & integration tests)
 make test
 # or
 uv run pytest -v

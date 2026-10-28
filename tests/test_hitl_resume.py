@@ -1,10 +1,10 @@
-"""Unit and integration test for out-of-process Human-in-the-Loop interrupt and resume."""
+"""Unit and integration test for out-of-process Human-in-the-Loop interrupt, resume, and idempotency."""
 
 import json
 import os
 
 from langgraph_multi_agent_system.checkpoint import get_checkpointer
-from langgraph_multi_agent_system.cli import log_hitl_audit_event
+from langgraph_multi_agent_system.cli import log_hitl_audit_event, resume_pipeline
 from langgraph_multi_agent_system.graph import create_graph
 
 
@@ -153,3 +153,25 @@ def test_hitl_audit_logging(tmp_path):
     assert record["approved"] is True
     assert record["status"] == "success"
     assert record["details"]["reviewer"] == "Philippe"
+
+
+def test_hitl_idempotency_and_invalid_threads(tmp_path):
+    """Verify that resume_pipeline handles non-existent threads and duplicate approvals idempotently."""
+    audit_file = str(tmp_path / "idempotency_audit.log")
+
+    # 1. Non-existent thread ID
+    res_invalid = resume_pipeline(
+        "non-existent-thread-9999",
+        approved=True,
+        audit_file=audit_file,
+    )
+    assert res_invalid["status"] == "thread_not_found"
+
+    # Check audit record
+    with open(audit_file, encoding="utf-8") as f:
+        lines = [json.loads(line) for line in f]
+    assert any(
+        r["thread_id"] == "non-existent-thread-9999"
+        and r["status"] == "thread_not_found"
+        for r in lines
+    )

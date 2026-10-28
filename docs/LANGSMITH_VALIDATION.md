@@ -20,7 +20,7 @@ The system is configured to communicate with the European Union instance of Lang
 ```python
 client = Client(
     api_key=api_key,
-    api_url=os.getenv("LANGCHAIN_ENDPOINT", "https://eu.api.smith.langchain.com")
+    api_url=os.getenv("LANGCHAIN_ENDPOINT", "https://eu.api.smith.langchain.com"),
 )
 ```
 

@@ -86,7 +86,9 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
         }
 
     # If no research done yet -> researcher
-    if not research_notes:
+    msgs = state.get("messages", [])
+    researcher_ran = any("[Researcher]" in str(m.content) for m in msgs)
+    if not research_notes and not researcher_ran:
         return {
             "next_agent": "researcher",
             "messages": [
@@ -97,7 +99,8 @@ def supervisor_node(state: AgentState) -> dict[str, Any]:
         }
 
     # If research done but no quantitative analysis -> analyst
-    if not quantitative_data:
+    analyst_ran = any("[Analyst]" in str(m.content) for m in msgs)
+    if not quantitative_data and not analyst_ran:
         return {
             "next_agent": "analyst",
             "messages": [
